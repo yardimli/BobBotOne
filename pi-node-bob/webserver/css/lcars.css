@@ -1,0 +1,125 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto+Condensed:400,700);
+@font-face {
+    font-family: 'swiss911';
+    font-weight: normal;
+    font-style: normal;
+    src: url(../fonts/Swiss911UltraCompressedBT.ttf);
+    letter-spacing: .05em;
+
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+body::-webkit-scrollbar-button {
+    display: none;
+}
+
+body {
+    background-image: url(../images/stars.jpg);
+    background-repeat: repeat;
+    background-color: #000;
+    /*color: #fff;*/
+    margin: 0;
+    padding: 0;
+    /*    overflow: hidden; */
+
+    /*-webkit-animation: sky 82s linear infinite;*/
+    /*-moz-animation: sky 82s linear infinite;*/
+    /*-ms-animation: sky 82s linear infinite;*/
+    /*-o-animation: sky 82s linear infinite;*/
+    /*animation: sky 82s linear infinite;*/
+
+    font-family: 'Roboto Condensed';
+    line-height: 1;
+
+}
+
+@keyframes sky {
+    50% {
+        background-position: 600px 0px;
+    }
+    100% {
+        background-position: 1200px 0px;
+    }
+}
+
+.lcars2_button,
+.lcars2_button:active,
+.lcars2_button:hover,
+.lcars2_button:visited {
+    cursor: pointer;
+    font-family: 'swiss911', Impact, sans-serif;
+    text-transform: uppercase;
+    color: #000;
+}
+
+.lcars2_button:active {
+    background-color: hsla(36, 100%, 70%, 1) !important;
+}
+
+.lcars2_button {
+    background-color: hsla(36, 100%, 50%, 1) !important;
+    border-radius: 2em;
+    display: inline-block;
+    font-size: 1.5em;
+    letter-spacing: .05em;
+    margin: .25em;
+    padding: .5em;
+    text-align: right;
+    text-decoration: none;
+    text-transform: uppercase;
+    width: 6em;
+}
+
+.hail {
+    background-color: hsla(240, 40%, 80%, 1) !important;
+}
+
+.hail:active {
+    background-color: hsla(240, 40%, 90%, 1) !important;
+}
+
+.camerabox {
+    width: 85%;
+    cursor: pointer;
+}
+
+.camerabox_big {
+    width: 85%;
+}
+
+.camerabox_container {
+    width: 85%; !important;
+    padding: 1px !important;
+}
+
+.slam_lidar_view {
+    width: 74%;
+}
+
+/* Text */
+
+.highlight td{
+    color: #f8fbdb !important;
+}
+
+#consoletop {
+    position:relative;
+    width: 90%;
+    top: 15px;
+    margin-left:70px;
+}
+#consoletop table {
+    margin: 0 auto;
+    width: 100%;
+
+}
+#consoletop td {
+    font-family: 'Roboto Condensed';
+    color: #fe9800;
+    padding-left:10px;
+    font-size:18px;
+    letter-spacing:1px;
+    text-align:right;
+}

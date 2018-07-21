@@ -1,0 +1,4 @@
+[Desktop Entry]
+Name = clickmotion
+Exec = lxterminal -e "/home/pi/SmartRobot/start-clickmotion.sh"
+Type = applicaton
