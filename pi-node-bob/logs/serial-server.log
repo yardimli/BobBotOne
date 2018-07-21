@@ -1,0 +1,158 @@
+Sat Jul 21 2018 22:15:13 GMT+0800 (Taipei Standard Time) ===================================================================
+Sat Jul 21 2018 22:15:13 GMT+0800 (Taipei Standard Time) starting raspberry-pi-mjpeg-server.js
+Sat Jul 21 2018 22:15:13 GMT+0800 (Taipei Standard Time) comm port ready
+Sat Jul 21 2018 22:15:15 GMT+0800 (Taipei Standard Time) serial input =>{op:'start':mes:'Hello World'}
+Sat Jul 21 2018 22:15:16 GMT+0800 (Taipei Standard Time) serial input =>
+Sat Jul 21 2018 22:15:16 GMT+0800 (Taipei Standard Time) serial input =>Revision ID: 10
+Sat Jul 21 2018 22:15:16 GMT+0800 (Taipei Standard Time) serial input =>Device ID: EE
+Sat Jul 21 2018 22:15:16 GMT+0800 (Taipei Standard Time) serial input =>
+Sat Jul 21 2018 22:15:17 GMT+0800 (Taipei Standard Time) serial input =>{op:'sensordata', cycle:1, lb:1, rb:1, lh:1, rh:1}
+Sat Jul 21 2018 22:15:17 GMT+0800 (Taipei Standard Time) serial input =>{op:'sensordata', cycle:5, lb:1, rb:1, lh:0, rh:1}
+Sat Jul 21 2018 22:15:17 GMT+0800 (Taipei Standard Time) serial input =>{op:'sensordata', cycle:6, lb:1, rb:1, lh:1, rh:1}
+Sat Jul 21 2018 22:15:18 GMT+0800 (Taipei Standard Time) serial input =>{op:'sensordata', cycle:24, lb:1, rb:1, lh:0, rh:1}
+Sat Jul 21 2018 22:15:18 GMT+0800 (Taipei Standard Time) serial input =>{op:'sensordata', cycle:25, lb:1, rb:1, lh:1, rh:1}
+Sat Jul 21 2018 22:15:18 GMT+0800 (Taipei Standard Time) serial input =>{op:'sensordata', cycle:30, lb:1, rb:1, lh:0, rh:1}
+Sat Jul 21 2018 22:15:18 GMT+0800 (Taipei Standard Time) serial input =>{op:'sensordata', cycle:32, lb:1, rb:1, lh:1, rh:1}
+Sat Jul 21 2018 22:15:25 GMT+0800 (Taipei Standard Time) Request received on: /video_stream.jpgmethod: GET query: {"time":"1","pDelay":"120000"}
+Sat Jul 21 2018 22:15:28 GMT+0800 (Taipei Standard Time) Request received on: /video_stream.jpgmethod: GET query: {"time":"1","pDelay":"120000"}
+Sat Jul 21 2018 22:15:28 GMT+0800 (Taipei Standard Time) Connection closed!
+Sat Jul 21 2018 22:15:29 GMT+0800 (Taipei Standard Time) Request received on: /webserver/index.htmlmethod: GET query: {}
+Sat Jul 21 2018 22:15:29 GMT+0800 (Taipei Standard Time) Request received on: /webserver/js/jquery-1.11.3.min.jsmethod: GET query: {}
+Sat Jul 21 2018 22:15:29 GMT+0800 (Taipei Standard Time) Request received on: /webserver/css/bootstrap.cssmethod: GET query: {}
+Sat Jul 21 2018 22:15:29 GMT+0800 (Taipei Standard Time) Request received on: /webserver/css/lcars.cssmethod: GET query: {}
+Sat Jul 21 2018 22:15:29 GMT+0800 (Taipei Standard Time) Request received on: /webserver/css/lcars3.cssmethod: GET query: {}
+Sat Jul 21 2018 22:15:29 GMT+0800 (Taipei Standard Time) Request received on: /webserver/css/lcars2.cssmethod: GET query: {}
+Sat Jul 21 2018 22:15:29 GMT+0800 (Taipei Standard Time) Request received on: /webserver/js/bootstrap.min.jsmethod: GET query: {}
+Sat Jul 21 2018 22:15:30 GMT+0800 (Taipei Standard Time) Request received on: /webserver/knob/dist/jquery.knob.min.jsmethod: GET query: {}
+Sat Jul 21 2018 22:15:30 GMT+0800 (Taipei Standard Time) Request received on: /webserver/js/keymaster.jsmethod: GET query: {}
+Sat Jul 21 2018 22:15:30 GMT+0800 (Taipei Standard Time) Request received on: /webserver/js/sobel.jsmethod: GET query: {}
+Sat Jul 21 2018 22:15:30 GMT+0800 (Taipei Standard Time) Request received on: /webserver/js/keypress.jsmethod: GET query: {}
+Sat Jul 21 2018 22:15:30 GMT+0800 (Taipei Standard Time) Request received on: /webserver/index.jsmethod: GET query: {}
+Sat Jul 21 2018 22:15:30 GMT+0800 (Taipei Standard Time) Request received on: /webserver/images/stars.jpgmethod: GET query: {}
+Sat Jul 21 2018 22:15:30 GMT+0800 (Taipei Standard Time) Request received on: /webserver/fonts/Swiss911UltraCompressedBT.ttfmethod: GET query: {}
+Sat Jul 21 2018 22:15:30 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:30 GMT+0800 (Taipei Standard Time) Request received on: /video_stream.jpgmethod: GET query: {"time":"1","pDelay":"120000"}
+Sat Jul 21 2018 22:15:30 GMT+0800 (Taipei Standard Time) Request received on: /webserver/audio/computerbeep_23.mp3method: GET query: {}
+Sat Jul 21 2018 22:15:30 GMT+0800 (Taipei Standard Time) Request received on: /webserver/audio/computerbeep_35.mp3method: GET query: {}
+Sat Jul 21 2018 22:15:31 GMT+0800 (Taipei Standard Time) Request received on: /webserver/audio/computerbeep_27.mp3method: GET query: {}
+Sat Jul 21 2018 22:15:31 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:33 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:34 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:35 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:36 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:37 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:38 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:40 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:41 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:42 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:43 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:44 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:45 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:47 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:48 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:49 GMT+0800 (Taipei Standard Time) Request received on: /webserver/status.htmlmethod: GET query: {}
+Sat Jul 21 2018 22:15:49 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:50 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:51 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:52 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:53 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:55 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:56 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:57 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:58 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:15:59 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:00 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:01 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:03 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:04 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:05 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:06 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:07 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:08 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:09 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:11 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:12 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:13 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:14 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:15 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:16 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:17 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:19 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:20 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:21 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:22 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:23 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:24 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:25 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:27 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:28 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:29 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:30 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:31 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:32 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:33 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:34 GMT+0800 (Taipei Standard Time) Request received on: /webserver/status.htmlmethod: GET query: {}
+Sat Jul 21 2018 22:16:35 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:36 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:37 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:37 GMT+0800 (Taipei Standard Time) Request received on: /webserver/index.htmlmethod: GET query: {}
+Sat Jul 21 2018 22:16:38 GMT+0800 (Taipei Standard Time) Connection closed!
+Sat Jul 21 2018 22:16:38 GMT+0800 (Taipei Standard Time) Request received on: /webserver/css/bootstrap.cssmethod: GET query: {}
+Sat Jul 21 2018 22:16:38 GMT+0800 (Taipei Standard Time) Request received on: /webserver/css/lcars.cssmethod: GET query: {}
+Sat Jul 21 2018 22:16:38 GMT+0800 (Taipei Standard Time) Request received on: /webserver/css/lcars3.cssmethod: GET query: {}
+Sat Jul 21 2018 22:16:38 GMT+0800 (Taipei Standard Time) Request received on: /webserver/css/lcars2.cssmethod: GET query: {}
+Sat Jul 21 2018 22:16:38 GMT+0800 (Taipei Standard Time) Request received on: /webserver/js/jquery-1.11.3.min.jsmethod: GET query: {}
+Sat Jul 21 2018 22:16:38 GMT+0800 (Taipei Standard Time) Request received on: /webserver/js/bootstrap.min.jsmethod: GET query: {}
+Sat Jul 21 2018 22:16:38 GMT+0800 (Taipei Standard Time) Request received on: /webserver/knob/dist/jquery.knob.min.jsmethod: GET query: {}
+Sat Jul 21 2018 22:16:38 GMT+0800 (Taipei Standard Time) Request received on: /webserver/js/keymaster.jsmethod: GET query: {}
+Sat Jul 21 2018 22:16:39 GMT+0800 (Taipei Standard Time) Request received on: /webserver/js/sobel.jsmethod: GET query: {}
+Sat Jul 21 2018 22:16:39 GMT+0800 (Taipei Standard Time) Request received on: /webserver/js/keypress.jsmethod: GET query: {}
+Sat Jul 21 2018 22:16:39 GMT+0800 (Taipei Standard Time) Request received on: /webserver/index.jsmethod: GET query: {}
+Sat Jul 21 2018 22:16:39 GMT+0800 (Taipei Standard Time) Request received on: /webserver/images/stars.jpgmethod: GET query: {}
+Sat Jul 21 2018 22:16:39 GMT+0800 (Taipei Standard Time) Request received on: /webserver/fonts/Swiss911UltraCompressedBT.ttfmethod: GET query: {}
+Sat Jul 21 2018 22:16:39 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:39 GMT+0800 (Taipei Standard Time) Request received on: /video_stream.jpgmethod: GET query: {"time":"1","pDelay":"120000"}
+Sat Jul 21 2018 22:16:39 GMT+0800 (Taipei Standard Time) Request received on: /webserver/audio/computerbeep_23.mp3method: GET query: {}
+Sat Jul 21 2018 22:16:39 GMT+0800 (Taipei Standard Time) Request received on: /webserver/audio/computerbeep_35.mp3method: GET query: {}
+Sat Jul 21 2018 22:16:39 GMT+0800 (Taipei Standard Time) Request received on: /webserver/audio/computerbeep_27.mp3method: GET query: {}
+Sat Jul 21 2018 22:16:40 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:41 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:43 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:44 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:45 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:46 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:47 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:49 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:50 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:51 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:52 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:53 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:54 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:56 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:57 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:58 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:16:59 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:00 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:01 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:03 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:04 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:05 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:06 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:07 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:09 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:10 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:11 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:12 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:13 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:14 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:16 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:17 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:18 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:19 GMT+0800 (Taipei Standard Time) Request received on: /webserver/status.htmlmethod: GET query: {}
+Sat Jul 21 2018 22:17:20 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:21 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:22 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:23 GMT+0800 (Taipei Standard Time) Request received on: /read_datamethod: GET query: {}
+Sat Jul 21 2018 22:17:24 GMT+0800 (Taipei Standard Time) Connection closed!
+Sat Jul 21 2018 22:17:24 GMT+0800 (Taipei Standard Time) Connection closed!
+Sat Jul 21 2018 22:18:03 GMT+0800 (Taipei Standard Time) Request received on: /webserver/status.htmlmethod: GET query: {}

@@ -1,0 +1,87 @@
+Sat Jul 21 2018 22:11:32 GMT+0800 (Taipei Standard Time) starting server.js
+Sat Jul 21 2018 22:11:32 GMT+0800 (Taipei Standard Time) ===================================================================
+Sat Jul 21 2018 22:11:32 GMT+0800 (Taipei Standard Time) starting serial/server control in 5 sec
+Sat Jul 21 2018 22:11:37 GMT+0800 (Taipei Standard Time) starting video.codeplay.me tunnel in 10 sec
+Sat Jul 21 2018 22:11:38 GMT+0800 (Taipei Standard Time) starting serial/server tunnel now.
+Sat Jul 21 2018 22:11:38 GMT+0800 (Taipei Standard Time) killing serial/server control in 45 min.
+Sat Jul 21 2018 22:11:43 GMT+0800 (Taipei Standard Time) serial/server tunnel =>raspberry-pi-mjpeg-server started on port 8080
+
+Sat Jul 21 2018 22:11:43 GMT+0800 (Taipei Standard Time) serial/server tunnel =>Visit http://192.168.1.246:8080 to view your PI camera stream
+
+
+Sat Jul 21 2018 22:11:44 GMT+0800 (Taipei Standard Time) serial/server tunnel =>executing...
+
+Sat Jul 21 2018 22:11:44 GMT+0800 (Taipei Standard Time) serial/server tunnel =>raspistill -n   -th 0:0:0  -t 999999999  -tl 250  -w 820  -h 616  -q 10  -o /tmp/raspberry-pi-mjpeg-server-image.jpg 
+---
+
+Sat Jul 21 2018 22:11:44 GMT+0800 (Taipei Standard Time) serial/server tunnel =>http port already in use
+
+Sat Jul 21 2018 22:11:47 GMT+0800 (Taipei Standard Time) starting video.codeplay.me tunnel now.
+Sat Jul 21 2018 22:11:52 GMT+0800 (Taipei Standard Time) video.codeplay.me tunnel =>http://video.codeplay.me
+
+Sat Jul 21 2018 22:12:17 GMT+0800 (Taipei Standard Time) testing video.codeplay.me reachablity.
+Sat Jul 21 2018 22:12:18 GMT+0800 (Taipei Standard Time) video.codeplay.me reachability test GOOD.
+Sat Jul 21 2018 22:13:02 GMT+0800 (Taipei Standard Time) testing video.codeplay.me reachablity.
+Sat Jul 21 2018 22:13:03 GMT+0800 (Taipei Standard Time) video.codeplay.me reachability test GOOD.
+Sat Jul 21 2018 22:13:27 GMT+0800 (Taipei Standard Time) ===================================================================
+Sat Jul 21 2018 22:13:27 GMT+0800 (Taipei Standard Time) starting server.js
+Sat Jul 21 2018 22:13:27 GMT+0800 (Taipei Standard Time) starting serial/server control in 5 sec
+Sat Jul 21 2018 22:13:32 GMT+0800 (Taipei Standard Time) starting video.codeplay.me tunnel in 10 sec
+Sat Jul 21 2018 22:13:32 GMT+0800 (Taipei Standard Time) starting serial/server tunnel now.
+Sat Jul 21 2018 22:13:33 GMT+0800 (Taipei Standard Time) killing serial/server control in 45 min.
+Sat Jul 21 2018 22:13:42 GMT+0800 (Taipei Standard Time) starting video.codeplay.me tunnel now.
+Sat Jul 21 2018 22:13:43 GMT+0800 (Taipei Standard Time) serial/server tunnel =>raspberry-pi-mjpeg-server started on port 8080
+
+Sat Jul 21 2018 22:13:43 GMT+0800 (Taipei Standard Time) serial/server tunnel =>Visit http://192.168.1.246:8080 to view your PI camera stream
+
+Sat Jul 21 2018 22:13:43 GMT+0800 (Taipei Standard Time) serial/server tunnel =>
+
+Sat Jul 21 2018 22:13:43 GMT+0800 (Taipei Standard Time) serial/server tunnel =>executing...
+
+Sat Jul 21 2018 22:13:43 GMT+0800 (Taipei Standard Time) serial/server tunnel =>raspistill -n   -th 0:0:0  -t 999999999  -tl 250  -w 820  -h 616  -q 10  -o /tmp/raspberry-pi-mjpeg-server-image.jpg 
+
+Sat Jul 21 2018 22:13:43 GMT+0800 (Taipei Standard Time) serial/server tunnel =>---
+
+Sat Jul 21 2018 22:13:44 GMT+0800 (Taipei Standard Time) serial/server tunnel =>http port already in use
+
+Sat Jul 21 2018 22:13:49 GMT+0800 (Taipei Standard Time) video.codeplay.me tunnel =>http://video.codeplay.me
+
+Sat Jul 21 2018 22:14:12 GMT+0800 (Taipei Standard Time) testing video.codeplay.me reachablity.
+Sat Jul 21 2018 22:14:13 GMT+0800 (Taipei Standard Time) video.codeplay.me reachability test GOOD.
+Sat Jul 21 2018 22:15:03 GMT+0800 (Taipei Standard Time) ===================================================================
+Sat Jul 21 2018 22:15:03 GMT+0800 (Taipei Standard Time) starting server.js
+Sat Jul 21 2018 22:15:03 GMT+0800 (Taipei Standard Time) starting serial/server control in 5 sec
+Sat Jul 21 2018 22:15:08 GMT+0800 (Taipei Standard Time) starting video.codeplay.me tunnel in 10 sec
+Sat Jul 21 2018 22:15:08 GMT+0800 (Taipei Standard Time) starting serial/server tunnel now.
+Sat Jul 21 2018 22:15:09 GMT+0800 (Taipei Standard Time) killing serial/server control in 45 min.
+Sat Jul 21 2018 22:15:13 GMT+0800 (Taipei Standard Time) serial/server tunnel =>raspberry-pi-mjpeg-server started on port 8080
+
+Sat Jul 21 2018 22:15:13 GMT+0800 (Taipei Standard Time) serial/server tunnel =>Visit http://192.168.1.246:8080 to view your PI camera stream
+
+Sat Jul 21 2018 22:15:13 GMT+0800 (Taipei Standard Time) serial/server tunnel =>
+
+Sat Jul 21 2018 22:15:13 GMT+0800 (Taipei Standard Time) serial/server tunnel =>executing...
+
+Sat Jul 21 2018 22:15:13 GMT+0800 (Taipei Standard Time) serial/server tunnel =>raspistill -n   -th 0:0:0  -t 999999999  -tl 250  -w 820  -h 616  -q 10  -o /tmp/raspberry-pi-mjpeg-server-image.jpg 
+
+Sat Jul 21 2018 22:15:13 GMT+0800 (Taipei Standard Time) serial/server tunnel =>---
+
+Sat Jul 21 2018 22:15:13 GMT+0800 (Taipei Standard Time) serial/server tunnel =>comm port ready
+
+Sat Jul 21 2018 22:15:18 GMT+0800 (Taipei Standard Time) starting video.codeplay.me tunnel now.
+Sat Jul 21 2018 22:15:24 GMT+0800 (Taipei Standard Time) video.codeplay.me tunnel =>http://video.codeplay.me
+
+Sat Jul 21 2018 22:15:48 GMT+0800 (Taipei Standard Time) testing video.codeplay.me reachablity.
+Sat Jul 21 2018 22:15:49 GMT+0800 (Taipei Standard Time) video.codeplay.me reachability test GOOD.
+Sat Jul 21 2018 22:16:33 GMT+0800 (Taipei Standard Time) testing video.codeplay.me reachablity.
+Sat Jul 21 2018 22:16:34 GMT+0800 (Taipei Standard Time) video.codeplay.me reachability test GOOD.
+Sat Jul 21 2018 22:17:18 GMT+0800 (Taipei Standard Time) testing video.codeplay.me reachablity.
+Sat Jul 21 2018 22:17:19 GMT+0800 (Taipei Standard Time) cant reach myself at video.codeplay.me, restarting service 
+Sat Jul 21 2018 22:17:19 GMT+0800 (Taipei Standard Time) killing video.codeplay.me tunnel in 5 sec.
+Sat Jul 21 2018 22:17:24 GMT+0800 (Taipei Standard Time) killing video.codeplay.me tunnel now.
+Sat Jul 21 2018 22:17:24 GMT+0800 (Taipei Standard Time) starting video.codeplay.me tunnel in 10 sec
+Sat Jul 21 2018 22:17:34 GMT+0800 (Taipei Standard Time) starting video.codeplay.me tunnel now.
+Sat Jul 21 2018 22:17:41 GMT+0800 (Taipei Standard Time) video.codeplay.me tunnel =>http://video.codeplay.me
+
+Sat Jul 21 2018 22:18:03 GMT+0800 (Taipei Standard Time) testing video.codeplay.me reachablity.
+Sat Jul 21 2018 22:18:03 GMT+0800 (Taipei Standard Time) video.codeplay.me reachability test GOOD.

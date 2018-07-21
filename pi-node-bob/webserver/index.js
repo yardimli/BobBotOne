@@ -31,7 +31,7 @@ function createImageLayer() {
 //  img.onload = imageOnload;
 //  img.onclick = imageOnclick;
   imageNr++;
-  img.src = "http://video.codeplay.me/video_stream.jpg?time=" + (imageNr) + "&pDelay=120000";
+  img.src = "/video_stream.jpg?time=" + (imageNr) + "&pDelay=120000";
   img.crossOrigin = 'Anonymous';
   var webcam = document.getElementById("webcam");
   webcam.insertBefore(img, webcam.firstChild);
@@ -102,24 +102,21 @@ function GetTime() {
 
 
 function GetStatus() {
-  var UrlToGet = "http://192.168.1.246:8080/status.php";
+  var UrlToGet = "/read_data";
   var data = {};
 
   $.ajax({
     url: UrlToGet,
     data: data,
     success: function (data, status) {
-//            console.log("Status: " + status);
-//            console.log(data);
+      console.log("Status: " + status);
+      console.log(data);
       if (LastStatusCheck == null) LastStatusCheck = data;
 
       $.each(data, function (key, value) {
         console.log(key);
-        console.log(value["capture_time"]);
-//                console.log(value["preview"]);
-//                console.log(value["servo"]);
-//                $("#pi246_blur").attr("src", "http://192.168.1.246:8080"+ value["filename_blur"] + "?n=" + xnum);
-
+        console.log(value);
+        key = 2;
 
         $("#table_stream_" + key + "").addClass("highlight");
 
@@ -128,8 +125,6 @@ function GetStatus() {
         clearTimeout(StatusTimeout[key2]);
 
         StatusTimeout[key2] = setTimeout(function () {
-          //console.log("timeout:");
-          //console.log(key2);
           $("#table_stream_" + key2 + "").removeClass("highlight");
         }, 5000);
 
@@ -153,14 +148,13 @@ function GetStatus() {
             }
             $("#table_stream_" + key + " td:nth-child(8)").html(value["preview"].timestamp);
         */
-
       });
 
       LastStatusCheck = data;
 
       backgroundCheck = setTimeout(function () {
-        //GetStatus();
-      }, 200);
+        GetStatus();
+      }, 1000);
     },
     dataType: "json"
   });
@@ -183,7 +177,7 @@ $(document).ready(function () {
   listener.register_combo({
     keys: "w", on_keyup: function () {
       var QData = "<Advance,96,90>";
-      var UrlToGet = "http://video.codeplay.me/write_data?q=" + QData;
+      var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
@@ -193,7 +187,7 @@ $(document).ready(function () {
   listener.register_combo({
     keys: "s", on_keyup: function () {
       var QData = "<Back_Off,96,60>";
-      var UrlToGet = "http://video.codeplay.me/write_data?q=" + QData;
+      var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
@@ -203,7 +197,7 @@ $(document).ready(function () {
   listener.register_combo({
     keys: "a", on_keyup: function () {
       var QData = "<Turn_L,96,40>";
-      var UrlToGet = "http://video.codeplay.me/write_data?q=" + QData;
+      var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
@@ -213,7 +207,7 @@ $(document).ready(function () {
   listener.register_combo({
     keys: "d", on_keyup: function () {
       var QData = "<Turn_R,96,40>";
-      var UrlToGet = "http://video.codeplay.me/write_data?q=" + QData;
+      var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
@@ -225,34 +219,13 @@ $(document).ready(function () {
     $("#clockplace").html(GetTime());
   }, 1000);
 
-//  GetStatus();
+  GetStatus();
 
-
-  $('.camerabox').on('click', function () {
-    document.getElementById('panel-beep').play();
-    var xserverid = $(this).closest('.streambox').data("piid");
-    var xcameraid = $(this).closest('.streambox').data("cameraid");
-    $(".camerabox_big").attr("src", "http://192.168.1.246:8080/pi_camera/picamera_full_246.jpg?n=" + xnum);
-  });
-
-  $('.streambtn').on('click', function () {
-    var xnum = Math.random();
-    document.getElementById('panel-beep2').play();
-    var xserverid = $(this).closest('.streambox').data("piid");
-    var xcameraid = $(this).closest('.streambox').data("cameraid");
-
-    var UrlToGet = "http://192.168.1.246:8080/startupload.php";
-
-    $.get(UrlToGet, function (data, status) {
-      console.log("Data: " + data + "    -- Status: " + status);
-      console.log(xcameraid);
-    });
-  });
 
   $('.servobtn').on('click', function () {
     var xnum = Math.random();
     document.getElementById('panel-beep3').play();
-    var UrlToGet = "http://video.codeplay.me/write_data?q=" + $(this).val();
+    var UrlToGet = "/write_data?q=" + $(this).val();
 
     $.get(UrlToGet, function (data, status) {
       console.log("Data: " + data + "    -- Status: " + status);

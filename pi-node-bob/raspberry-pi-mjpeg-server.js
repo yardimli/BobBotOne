@@ -16,6 +16,23 @@ var fs = require("fs"),
 var serialport = require("serialport");
 var qs = require("querystring");
 
+var log_filename = './logs/serial-server.log';
+
+function log_to_file(logstr) {
+  fs.appendFile(log_filename, new Date().toString() + " " + logstr + "\r\n", function (err) {
+    if (err) {
+//      console.log(err);
+    }
+    else {
+    }
+  });
+}
+
+
+log_to_file("===================================================================");
+log_to_file("starting raspberry-pi-mjpeg-server.js");
+
+
 var SerialPort = serialport; // localize object constructor
 var portName = '/dev/ttyACM0';
 
@@ -29,6 +46,7 @@ var SerialBuffer = "";
 
 sp.on("open", function () {
   console.log("comm port ready");
+  log_to_file("comm port ready");
 });
 
 sp.on('data', function (data) {
@@ -40,12 +58,13 @@ sp.on('data', function (data) {
   while (match) {
     var match = /\r|\n/.exec(SerialBuffer);
     if (match) {
-      console.log(match.index + " " + (SerialBuffer.length - 1));
+      // console.log(match.index + " " + (SerialBuffer.length - 1));
 
       NewLine = SerialBuffer.substring(0, match.index);
       SerialBuffer = SerialBuffer.substring(match.index + 2);
 
 //      console.log(NewLine);
+      log_to_file("serial input =>" + NewLine);
 
       if (SerialData.length > 0) {
         if (SerialData[SerialData.length - 1].data === NewLine) {
@@ -101,7 +120,7 @@ var server = http.createServer(function (req, res) {
   const xpath = queryData.pathname, query = queryData.query;
   const method = req.method;
 
-  console.log(`Request received on: ${xpath} + method: ${method} + query: ${JSON.stringify(query)}`);
+  log_to_file("Request received on: " + xpath + "method: " + method + " query: " + JSON.stringify(query));
 //  console.log('query: ', query);
 
   if (req.method === 'OPTIONS') {
@@ -111,14 +130,14 @@ var server = http.createServer(function (req, res) {
   }
 
 
+  var contentType = 'text/html';
   //classic web server
   //---------------------------------------
   if (xpath.indexOf("/webserver") !== -1) {
     var filePath = '.' + req.url;
-    if (filePath === './webserver') filePath = './webserver/index.html';
+//    if (filePath === './webserver') filePath = './webserver/index.html';
 
     var extname = path.extname(filePath);
-    var contentType = 'text/html';
     switch (extname) {
       case '.js':
         contentType = 'text/javascript';
@@ -140,7 +159,8 @@ var server = http.createServer(function (req, res) {
         break;
     }
 
-    if (!fs.existsSync(filePath)) {
+    if (!fs.existsSync(filePath) || (!fs.lstatSync(filePath).isFile())) {
+      log_to_file(filePath + " doesnt exist.");
       fs.readFile('./404.html', function (error, content) {
         res.writeHead(200, {'Content-Type': contentType});
         res.end(content, 'utf-8');
@@ -150,12 +170,14 @@ var server = http.createServer(function (req, res) {
     fs.readFile(filePath, function (error, content) {
       if (error) {
         if (error.code == 'ENOENT') {
+          log_to_file(filePath + " doesnt exist (2).");
           fs.readFile('./404.html', function (error, content) {
             res.writeHead(200, {'Content-Type': contentType});
             res.end(content, 'utf-8');
           });
         }
         else {
+          log_to_file(filePath + " doesnt exist (3).");
           res.writeHead(500);
           res.end('Sorry, check with the site admin for error: ' + error.code + ' ..\n');
           res.end();
@@ -176,6 +198,7 @@ var server = http.createServer(function (req, res) {
       }
     });
   }
+  else
   //end classic static web server
   //---------------------------------------
 
@@ -195,6 +218,7 @@ var server = http.createServer(function (req, res) {
     res.end();
 
   }
+  else
 
   // return a html page if the user accesses the server directly
   if (xpath === "/stream.html") {
@@ -219,8 +243,7 @@ var server = http.createServer(function (req, res) {
     res.end();
     return;
   }
-
-  if (xpath === "/read_data") {
+  else if (xpath === "/read_data") {
     res.writeHead(200, {
       'Content-Type': 'text/html',
       'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
@@ -236,8 +259,7 @@ var server = http.createServer(function (req, res) {
     SerialData = [];
     return;
   }
-
-  if (xpath === "/write_data") {
+  else if (xpath === "/write_data") {
 
     sp.write(query.q);
 
@@ -255,12 +277,12 @@ var server = http.createServer(function (req, res) {
     res.end("wrote data");
     return;
   }
-
-  if (xpath === "/health_check") {
+  else if (xpath === "/health_check") {
     res.statusCode = 200;
     res.end();
     return;
   }
+  else
 
   // for image requests, return a HTTP multipart document (stream)
   if (xpath === "/video_stream.jpg") {
@@ -297,22 +319,34 @@ var server = http.createServer(function (req, res) {
 // connection is closed when the browser terminates the request
 //
     res.on('close', function () {
-      console.log("Connection closed!");
+      log_to_file("Connection closed!");
+//      console.log("Connection closed!");
       PubSub.unsubscribe(subscriber_token);
       res.end();
+    });
+  }
+  else {
+    log_to_file(xpath + " doesnt exist (4).");
+//    console.log(xpath + " doesnt exist.");
+    fs.readFile('./404.html', function (error, content) {
+      res.writeHead(200, {'Content-Type': contentType});
+      res.end(content, 'utf-8');
     });
   }
 });
 
 server.on('error', function (e) {
   if (e.code == 'EADDRINUSE') {
-    console.log('port already in use');
+    console.log('http port already in use');
+    log_to_file('http port already in use');
   }
   else if (e.code == "EACCES") {
     console.log("Illegal port");
+    log_to_file('http Illegal port');
   }
   else {
     console.log("Unknown error");
+    log_to_file('http Unknown error');
   }
   process.exit(1);
 });
@@ -343,7 +377,8 @@ watcher.on('change', function (file) {
       PubSub.publish('MJPEG', imageData);
     }
     else {
-      console.log("MJPEG error:");
+      log_to_file("MJPEG error:");
+      log_to_file(err);
       console.log(err);
     }
   });
