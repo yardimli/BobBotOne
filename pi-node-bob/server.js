@@ -95,7 +95,7 @@ function startSerialControl() {
 
 
 function killSerialControl() {
-  log_to_file("killing serial/server control in 45 min.");
+  log_to_file("killing serial/server control in 15 min.");
   clearTimeout(killSerialControl_timeout);
   killSerialControl_timeout = setTimeout(function () {
     console.log("killing serial/server control now.");
@@ -104,7 +104,7 @@ function killSerialControl() {
     serial_tunnel.kill();
 
     startSerialControl();
-  }, 1000 * 60 * 45);
+  }, 1000 * 60 * 15);
 }
 
 

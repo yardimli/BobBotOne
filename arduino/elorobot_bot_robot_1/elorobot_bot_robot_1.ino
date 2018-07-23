@@ -1,4 +1,5 @@
 //Standard PWM DC control
+//v15
 int E1 = 5;     //M1 Speed Control
 int E2 = 6;     //M2 Speed Control
 int M1 = 4;    //M1 Direction Control
@@ -73,6 +74,10 @@ int LastRightHeight  = 0;
 
 String LCDMsg = "";
 
+int RepeatTurnLCounter = 0;
+int RepeatTurnLCounterSpeed = 0;
+int RepeatTurnRCounter = 0;
+int RepeatTurnRCounterSpeed = 0;
 
 //===========================================================================================
 const byte buffSize = 40;
@@ -84,6 +89,7 @@ boolean readInProgress = false;
 boolean newDataFromPC = false;
 
 char messageFromPC[buffSize] = {0};
+char StringMessage[buffSize] = {0};
 int FirstInt = 0;
 int SecondInt = 0;
 
@@ -136,6 +142,10 @@ void parseData() {
 
   strtokIndx = strtok(NULL, ",");
   SecondInt = atoi(strtokIndx);     // convert this part to an integer
+
+  strtokIndx = strtok(NULL, ",");
+  strcpy(StringMessage, strtokIndx); // copy it to messageFromPC
+
 //  servoFraction = atof(strtokIndx);     // convert this part to a float
 }
 
@@ -178,6 +188,7 @@ void loop(void)
   if (StopAfterN>0) {
     StopAfterN--;
     if (StopAfterN<=0) {
+      StopAfterN = 0;
       stop();
     }
   }
@@ -309,7 +320,6 @@ void loop(void)
 
 
 
-
   
   
 
@@ -366,8 +376,26 @@ void loop(void)
   if (RightHeight == LOW) { LCDMsg = "Right H"; }
 
 
-  if (LeftBumper == LOW || RightBumper == LOW) { stop(); }
-  if (LeftHeight == LOW || RightHeight == LOW) { stop(); }
+  if (LeftBumper == LOW || RightBumper == LOW) { RepeatTurnLCounter=0; RepeatTurnRCounter=0; stop(); }
+  if (LeftHeight == LOW || RightHeight == LOW) { RepeatTurnLCounter=0; RepeatTurnRCounter=0; stop(); }
+
+
+	if (RepeatTurnLCounter>0 && StopAfterN==0) {
+		RepeatTurnLCounter--;
+
+		if (RepeatTurnLCounter>10) {
+	    StopAfterN = 15;
+	    turn_L (RepeatTurnLCounterSpeed, RepeatTurnLCounterSpeed);
+	  }
+	}
+
+	if (RepeatTurnRCounter>0 && StopAfterN==0) {
+		RepeatTurnRCounter--;
+		if (RepeatTurnRCounter>10) {
+	    StopAfterN = 15;
+	    turn_R (RepeatTurnRCounterSpeed, RepeatTurnRCounterSpeed);
+	  }
+	}
 
   curMillis = millis();
   getDataFromPC();
@@ -384,43 +412,109 @@ void loop(void)
     Serial.print(curMillis >> 9); // divide by 512 is approx = half-seconds
     Serial.println(">");
 
+    if (strcmp(messageFromPC, "LCD") == 0) {
+      Serial.print("{op:'lcd', ");
+      Serial.print("set text to:");
+      Serial.print(StringMessage);
+      Serial.println("}");
+
+	    lcd.setRGB(255, 255, 255);
+	    lcd.setCursor(FirstInt,SecondInt);
+      lcd.print(StringMessage);
+    }
+
+    if (strcmp(messageFromPC, "Camera_GoTo") == 0) {
+      Serial.print("{op:'camera_goto', ");
+      Serial.print("CurrentValue:");
+      Serial.print(CameraGoTo);
+      Serial.print(", CurrentPos:");
+      Serial.print(CameraPos);
+      Serial.println("}");
+      CameraGoTo = FirstInt;
+    }
+
+    if (strcmp(messageFromPC, "Scan_GoTo") == 0) {
+      Serial.print("{op:'scan_goto', ");
+      Serial.print("CurrentValue:");
+      Serial.print(TOFGoTo);
+      Serial.print(", CurrentPos:");
+      Serial.print(TOFPos);
+      Serial.println("}");
+      TOFGoTo = FirstInt;
+    }
+
     if (strcmp(messageFromPC, "Advance") == 0) {
         if (SecondInt>120) { SecondInt=120; }
         StopAfterN = SecondInt;
-        advance (FirstInt, FirstInt);  //move forward in max speed
+        advance (FirstInt, FirstInt);
         Serial.print("{op:'advance', ");
         Serial.print("value_1:");
         Serial.print(FirstInt);
-        Serial.print("value_2:");
+        Serial.print(", value_2:");
         Serial.print(SecondInt);
         Serial.println("}");
+
+        RepeatTurnLCounter=0;
+        RepeatTurnRCounter=0;
         if (SecondInt<10) { delay(100); }
     }
 
     if (strcmp(messageFromPC, "Back_Off") == 0) {
         if (SecondInt>120) { SecondInt=120; }
         StopAfterN = SecondInt;
-        back_off (FirstInt, FirstInt);  //move back in max speed
+        back_off (FirstInt, FirstInt);
         Serial.print("{op:'back_off', ");
         Serial.print("value_1:");
         Serial.print(FirstInt);
-        Serial.print("value_2:");
+        Serial.print(", value_2:");
         Serial.print(SecondInt);
         Serial.println("}");
+
+        RepeatTurnLCounter=0;
+        RepeatTurnRCounter=0;
         if (SecondInt<10) { delay(100); }
     }
 
 
+    if (strcmp(messageFromPC, "Repeat_L") == 0) {
+        if (FirstInt>128) { FirstInt=128; }
+        if (SecondInt>40) { SecondInt=40; }
+        RepeatTurnLCounterSpeed = FirstInt;
+		    RepeatTurnLCounter = SecondInt;
+        Serial.print("{op:'repeat_turn_l', ");
+        Serial.print("speed:");
+        Serial.print(FirstInt);
+        Serial.print(", count:");
+        Serial.print(SecondInt);
+        Serial.println("}");
+    } else
+
+    if (strcmp(messageFromPC, "Repeat_R") == 0) {
+        if (FirstInt>128) { FirstInt=128; }
+        if (SecondInt>40) { SecondInt=40; }
+        RepeatTurnRCounterSpeed = FirstInt;
+		    RepeatTurnRCounter = SecondInt;
+        Serial.print("{op:'repeat_turn_r', ");
+        Serial.print("speed:");
+        Serial.print(FirstInt);
+        Serial.print(", count:");
+        Serial.print(SecondInt);
+        Serial.println("}");
+    }
+
     if (strcmp(messageFromPC, "Turn_L") == 0) {
         if (SecondInt>120) { SecondInt=120; }
         StopAfterN = SecondInt;
-        turn_L (FirstInt, FirstInt);  //move back in max speed
+        turn_L (FirstInt, FirstInt);
         Serial.print("{op:'turn_l', ");
         Serial.print("value_1:");
         Serial.print(FirstInt);
-        Serial.print("value_2:");
+        Serial.print(", value_2:");
         Serial.print(SecondInt);
         Serial.println("}");
+
+        RepeatTurnLCounter=0;
+        RepeatTurnRCounter=0;
         if (SecondInt<10) { delay(100); }
     }
 
@@ -428,49 +522,55 @@ void loop(void)
         Serial.print("{op:'turn_r', ");
         Serial.print("value_1:");
         Serial.print(FirstInt);
-        Serial.print("value_2:");
+        Serial.print(", value_2:");
         Serial.print(SecondInt);
         Serial.println("}");
         if (SecondInt>120) { SecondInt=120; }
         StopAfterN = SecondInt;
-        turn_R (FirstInt, FirstInt);  //move back in max speed
+        turn_R (FirstInt, FirstInt);
+
+        RepeatTurnLCounter=0;
+        RepeatTurnRCounter=0;
         if (SecondInt<10) { delay(100); }
     }
 
     if (strcmp(messageFromPC, "Switch_Scan") == 0) {
-          StartTOFScan = !StartTOFScan;
-          Serial.print("{op:'switch_scan', value:");
-          Serial.print(StartTOFScan);
-          Serial.println("}");
+        StartTOFScan = !StartTOFScan;
+        Serial.print("{op:'switch_scan', value:");
+        Serial.print(StartTOFScan);
+        Serial.println("}");
     }
 
     if (strcmp(messageFromPC, "Current_Distance") == 0) {
-          Serial.print("{op:'sensor_distance', value:");
-          Serial.print(sensor.getDistance());
-          Serial.println("}");
+        Serial.print("{op:'sensor_distance', value:");
+        Serial.print(sensor.getDistance());
+        Serial.println("}");
     }
 
     if (strcmp(messageFromPC, "Sweep_Servos") == 0) {
-          if (CameraGoTo==0) { CameraGoTo = 180; } else { CameraGoTo = 0; }
-          if (TOFGoTo==0) { TOFGoTo = 180; } else { TOFGoTo = 0; }
+        if (CameraGoTo==0) { CameraGoTo = 180; } else { CameraGoTo = 0; }
+        if (TOFGoTo==0) { TOFGoTo = 180; } else { TOFGoTo = 0; }
 
-          Serial.println("{op:'sweep_servo', msg:'Sweeping Servos'}");
+        Serial.println("{op:'sweep_servo', msg:'Sweeping Servos'}");
     }
 
     if (strcmp(messageFromPC, "Home_Servos") == 0) {
-          CameraGoTo = 90;
-          TOFGoTo = 90;
+        CameraGoTo = 90;
+        TOFGoTo = 90;
 
-          Serial.println("{op:'servo_to', msg:'Servo to 90'}");
+        Serial.println("{op:'servo_to', msg:'Servo to 90'}");
     }
 
     if (strcmp(messageFromPC, "Stop") == 0) {
-          stop();
-          AutoDrive = 0;
-          if (TOFServo.attached() ) { TOFServo.detach(); }
-          if (CameraServo.attached() ) { CameraServo.detach(); }
+        stop();
+        AutoDrive = 0;
+        RepeatTurnLCounter=0;
+        RepeatTurnRCounter=0;
 
-          Serial.println("{op:'stop', msg:'stop all'}");
+        if (TOFServo.attached() ) { TOFServo.detach(); }
+        if (CameraServo.attached() ) { CameraServo.detach(); }
+
+        Serial.println("{op:'stop', msg:'stop all'}");
     }
   }
 

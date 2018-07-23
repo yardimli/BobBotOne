@@ -3,7 +3,7 @@
 <head>
   <title>Elo Fox One</title>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
-  <meta http-equiv="refresh" content="600; url=index.html">
+  <meta http-equiv="refresh" content="1800; url=index.html">
 
   <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
 
@@ -27,6 +27,8 @@
   <script src="index.js" type="text/javascript" charset="utf-8"></script>
 
   <link href='https://fonts.googleapis.com/css?family=Oswald:400' rel='stylesheet' type='text/css'>
+
+  <link rel="icon" type="image/png" href="/webserver/favicon.ico">
 
 </head>
 
@@ -162,13 +164,11 @@
 
       <div class="row" style="width: 100%; margin:0 auto;">
 
-        <div class="col-xs-4 col-md-4 streambox" style="padding-left: 0px; padding-right: 10px;" id="pi246_tresh" data-piid="246_blur" data-cameraid="6_blur">
+        <div class="col-xs-12 col-md-6 streambox" style="padding-left: 0px; padding-right: 10px;" id="pi246_tresh" data-piid="246_blur" data-cameraid="6_blur">
           <h2>Motion 1</h2>
-          <figure style="min-height: 400px;">
+          <figure>
             <span style="margin-top: 13px;"></span>
-            <div id="webcam" style="">
-              <!-- img src="http://video.codeplay.me/html/cam_pic_new.php?time=1&pDelay=120000" id="small_stream_container" -->
-            </div>
+            <img src="/video_stream.jpg?time=1&pDelay=120000" id="stream_container" style="width: 85%">
 
             <br>
 
@@ -179,40 +179,11 @@
         </div>
 
 
-        <div class="col-xs-4 col-md-4 streambox" style="padding-left: 0px; padding-right: 10px;" id="pi246_small" data-piid="246" data-cameraid="6">
+        <div class="col-xs-12 col-md-6 streambox" style="padding-left: 0px; padding-right: 10px;" id="pi246_small" data-piid="246" data-cameraid="6">
           <h2>Motion 2</h2>
           <figure>
             <span style="margin-top: 13px;"></span>
-            <canvas id="canvas2" width="465" height="350"></canvas>
-            <br>
-            <div class="lcars2_button streambtn" style="margin:0px; font-size: 1em">Start</div>
-
-            <div class="sliderRadio">
-              <input type="radio" class="servobtn" name="motor_control" id="motor_cmd_L" value="<Turn_L,120,4>"/>
-              <label for="motor_cmd_L">Left</label>
-              <input type="radio" class="servobtn" name="motor_control" id="motor_cmd_U" value="<Advance,120,4>"/>
-              <label for="motor_cmd_U">Forward</label>
-              <input type="radio" class="servobtn" name="motor_control" id="motor_cmd_D" value="<Back_Off,120,4>" checked/>
-              <label for="motor_cmd_D">Backward</label>
-              <input type="radio" class="servobtn" name="motor_control" id="motor_cmd_R" value="<Turn_R,120,4>"/>
-              <label for="motor_cmd_R">Right</label>
-            </div>
-
-            <div style="margin-top:5px; padding-left:50px" class="small text-left servoinfo">
-            </div>
-
-            <figcaption>
-            </figcaption>
-
-          </figure>
-        </div>
-
-
-        <div class="col-xs-4 col-md-4 streambox" style="padding-left: 0px; padding-right: 10px;" id="pi246_hsv" data-piid="pi246_hsv" data-cameraid="6_thresh">
-          <h2>Motion 3</h2>
-          <figure>
-            <span style="margin-top: 13px;"></span>
-            <canvas id="canvas" width="465" height="350"></canvas>
+            <canvas id="image_process_canvas" width="465" height="350"></canvas>
             <br>
 
             <figcaption>
@@ -228,38 +199,53 @@
         <div class="col-xs-12 col-md-12" style="padding-left: 0px; padding-right: 10px;" id="pi244" data-piid="244" data-cameraid="4">
           <h2>Auxilary Systems</h2>
           <figure>
-            <span>Impulse Power</span>
+            <span style="margin-top: 13px;"></span>
+            <br>
+            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="<Turn_L,120,4,msg>">Left</div>
+            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="<Repeat_L,96,30,msg>">Left (Repeat)</div>
+            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="<Advance,120,4,msg>">Forward</div>
+            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="<Back_Off,120,4,msg>">Reverse</div>
+            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="<Repeat_R,96,30,msg>">Right (Repeat)</div>
+            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="<Turn_R,120,4,msg>">Right</div>
+            <div style="margin-top:5px; padding-left:50px" class="small text-left servoinfo">
+            </div>
+
+            <span>Camera Look</span>
             <div class="sliderRadio">
-              <input type="radio" class="servobtn" name="power" id="power_0" value="0"/>
-              <label for="power_0">0</label>
-              <input type="radio" class="servobtn" name="power" id="power_20" value="20"/>
-              <label for="power_20">20</label>
-              <input type="radio" class="servobtn" name="power" id="power_40" value="40"/>
-              <label for="power_40">40</label>
-              <input type="radio" class="servobtn" name="power" id="power_60" value="60" checked/>
-              <label for="power_60">60</label>
-              <input type="radio" class="servobtn" name="power" id="power_80" value="80"/>
-              <label for="power_80">80</label>
-              <input type="radio" class="servobtn" name="power" id="power_100" value="100"/>
-              <label for="power_100">100</label>
+              <input type="radio" class="camera_btn" name="camera_radio" id="camera_0" value="<Camera_GoTo,0,0,msg>"/>
+              <label for="camera_0">0</label>
+              <input type="radio" class="camera_btn" name="camera_radio" id="camera_30" value="<Camera_GoTo,30,0,msg>"/>
+              <label for="camera_30">30</label>
+              <input type="radio" class="camera_btn" name="camera_radio" id="camera_60" value="<Camera_GoTo,60,0,msg>"/>
+              <label for="camera_60">60</label>
+              <input type="radio" class="camera_btn" name="camera_radio" id="camera_90" value="<Camera_GoTo,90,0,msg>" checked/>
+              <label for="camera_90">90</label>
+              <input type="radio" class="camera_btn" name="camera_radio" id="camera_120" value="<Camera_GoTo,120,0,msg>"/>
+              <label for="camera_120">120</label>
+              <input type="radio" class="camera_btn" name="camera_radio" id="camera_150" value="<Camera_GoTo,150,0,msg>"/>
+              <label for="camera_150">150</label>
+              <input type="radio" class="camera_btn" name="camera_radio" id="camera_180" value="<Camera_GoTo,180,0,msg>"/>
+              <label for="camera_180">180</label>
             </div>
             <br/>
-            <span>Life Support</span>
+            <span>Scan Look</span>
             <div class="sliderRadio">
-              <input type="radio" class="servobtn" name="power2" id="power2_0" value="0"/>
-              <label for="power2_0">0</label>
-              <input type="radio" class="servobtn" name="power2" id="power2_20" value="20"/>
-              <label for="power2_20">20</label>
-              <input type="radio" class="servobtn" name="power2" id="power2_40" value="40" checked/>
-              <label for="power2_40">40</label>
-              <input type="radio" class="servobtn" name="power2" id="power2_60" value="60"/>
-              <label for="power2_60">60</label>
-              <input type="radio" class="servobtn" name="power2" id="power2_80" value="80"/>
-              <label for="power2_80">80</label>
-              <input type="radio" class="servobtn" name="power2" id="power2_100" value="100"/>
-              <label for="power2_100">100</label>
+              <input type="radio" class="scan_btn" name="scan_radio" id="scan_0" value="<Scan_GoTo,0,0,msg>"/>
+              <label for="scan_0">0</label>
+              <input type="radio" class="scan_btn" name="scan_radio" id="scan_30" value="<Scan_GoTo,30,0,msg>"/>
+              <label for="scan_30">30</label>
+              <input type="radio" class="scan_btn" name="scan_radio" id="scan_60" value="<Scan_GoTo,60,0,msg>"/>
+              <label for="scan_60">60</label>
+              <input type="radio" class="scan_btn" name="scan_radio" id="scan_90" value="<Scan_GoTo,90,0,msg>" checked/>
+              <label for="scan_90">90</label>
+              <input type="radio" class="scan_btn" name="scan_radio" id="scan_120" value="<Scan_GoTo,120,0,msg>"/>
+              <label for="scan_120">120</label>
+              <input type="radio" class="scan_btn" name="scan_radio" id="scan_150" value="<Scan_GoTo,150,0,msg>"/>
+              <label for="scan_150">150</label>
+              <input type="radio" class="scan_btn" name="scan_radio" id="scan_180" value="<Scan_GoTo,180,0,msg>"/>
+              <label for="scan_180">180</label>
             </div>
-            <br>
+            <br/>
             <span>Fish Tanks</span>
             <div class="sliderRadio">
               <input type="radio" class="servobtn" name="power3" id="power3_0" value="0"/>

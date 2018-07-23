@@ -19,24 +19,6 @@ var img;
 var canvas;
 var context;
 
-var canvas2;
-var context2;
-
-function createImageLayer() {
-  img = new Image();
-  img.style.position = "absolute";
-  img.style.zIndex = -1;
-  img.style.width = "90%";
-  img.id = "small_stream_container";
-//  img.onload = imageOnload;
-//  img.onclick = imageOnclick;
-  imageNr++;
-  img.src = "/video_stream.jpg?time=" + (imageNr) + "&pDelay=120000";
-  img.crossOrigin = 'Anonymous';
-  var webcam = document.getElementById("webcam");
-  webcam.insertBefore(img, webcam.firstChild);
-}
-
 
 function grayscale(input, output) {
   //Get the context for the loaded image
@@ -73,15 +55,21 @@ function grayscale(input, output) {
 
 // Two layers are always present (except at the very beginning), to avoid flicker
 setInterval(function () {
-  var img = document.getElementById('small_stream_container');
-  context.drawImage(img, 0, 0, 465, 350);
+  var img = document.getElementById('stream_container');
 
-  var imageData = context.getImageData(0, 0, 465, 350);
+  console.log(img.width);
+
+  canvas.width = img.width;
+  canvas.height = img.height;
+
+  context.drawImage(img, 0, 0, img.width, img.height);
+
+  var imageData = context.getImageData(0, 0, img.width, img.height);
   var sobelData = Sobel(imageData);
   var sobelImageData = sobelData.toImageData();
-  context2.putImageData(sobelImageData, 0, 0);
+  context.putImageData(sobelImageData, 0, 0);
 
-  grayscale(canvas, canvas);
+//  grayscale(canvas, canvas);
 }, 1000);
 
 
@@ -164,19 +152,14 @@ var cameraPreviewID = 0;
 $(document).ready(function () {
 //    document.body.webkitRequestFullScreen();
 
-  canvas = document.getElementById("canvas");
+  canvas = document.getElementById("image_process_canvas");
   context = canvas.getContext("2d");
 
-  canvas2 = document.getElementById("canvas2");
-  context2 = canvas2.getContext("2d");
-
-  createImageLayer();
-
-  var listener = new window.keypress.Listener();
+    var listener = new window.keypress.Listener();
 
   listener.register_combo({
     keys: "w", on_keyup: function () {
-      var QData = "<Advance,96,90>";
+      var QData = "<Advance,96,120,msg>";
       var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
@@ -186,7 +169,27 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "s", on_keyup: function () {
-      var QData = "<Back_Off,96,60>";
+      var QData = "<Back_Off,96,60,msg>";
+      var UrlToGet = "/write_data?q=" + QData;
+      $.get(UrlToGet, function (data, status) {
+        console.log("Data: " + data + "    -- Status: " + status);
+      });
+    }
+  });
+
+  listener.register_combo({
+    keys: "q", on_keyup: function () {
+      var QData = "<Turn_L,96,20,msg>";
+      var UrlToGet = "/write_data?q=" + QData;
+      $.get(UrlToGet, function (data, status) {
+        console.log("Data: " + data + "    -- Status: " + status);
+      });
+    }
+  });
+
+  listener.register_combo({
+    keys: "e", on_keyup: function () {
+      var QData = "<Turn_R,96,20,msg>";
       var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
@@ -196,7 +199,7 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "a", on_keyup: function () {
-      var QData = "<Turn_L,96,40>";
+      var QData = "<Repeat_L,96,25,msg>";
       var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
@@ -206,7 +209,7 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "d", on_keyup: function () {
-      var QData = "<Turn_R,96,40>";
+      var QData = "<Repeat_R,96,25,msg>";
       var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
@@ -214,6 +217,15 @@ $(document).ready(function () {
     }
   });
 
+  listener.register_combo({
+    keys: "x", on_keyup: function () {
+      var QData = "<Stop,0,0,msg>";
+      var UrlToGet = "/write_data?q=" + QData;
+      $.get(UrlToGet, function (data, status) {
+        console.log("Data: " + data + "    -- Status: " + status);
+      });
+    }
+  });
 
   setInterval(function () {
     $("#clockplace").html(GetTime());
@@ -222,9 +234,29 @@ $(document).ready(function () {
   GetStatus();
 
 
-  $('.servobtn').on('click', function () {
+  $('.generic_btn').on('click', function () {
     var xnum = Math.random();
     document.getElementById('panel-beep3').play();
+    var UrlToGet = "/write_data?q=" + $(this).data("sendthis");
+
+    $.get(UrlToGet, function (data, status) {
+      console.log("Data: " + data + "    -- Status: " + status);
+    });
+  });
+
+  $('.scan_btn').on('click', function () {
+    var xnum = Math.random();
+    document.getElementById('panel-beep2').play();
+    var UrlToGet = "/write_data?q=" + $(this).val();
+
+    $.get(UrlToGet, function (data, status) {
+      console.log("Data: " + data + "    -- Status: " + status);
+    });
+  });
+
+  $('.camera_btn').on('click', function () {
+    var xnum = Math.random();
+    document.getElementById('panel-beep').play();
     var UrlToGet = "/write_data?q=" + $(this).val();
 
     $.get(UrlToGet, function (data, status) {
