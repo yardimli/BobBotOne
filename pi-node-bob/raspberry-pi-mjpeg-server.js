@@ -237,7 +237,7 @@ var server = http.createServer(function (req, res) {
     res.write('<html>');
     res.write('<head><title>' + pjson.name + '</title><meta charset="utf-8" /></head>');
     res.write('<body>');
-    res.write('<img src="image.jpg" />');
+    res.write('<img src="video_stream.jpg" />');
     res.write('</body>');
     res.write('</html>');
     res.end();
@@ -260,7 +260,7 @@ var server = http.createServer(function (req, res) {
     return;
   }
   else if (xpath === "/write_data") {
-
+    sp.flush(function(err,results){});
     sp.write(query.q);
 
     res.writeHead(200, {
@@ -371,6 +371,8 @@ var watcher = chokidar.watch(tmpFile, {
 watcher.on('change', function (file) {
 
   //console.log('change >>> ', file);
+
+  fs.createReadStream(file).pipe(fs.createWriteStream('./webserver/camera.jpg'));
 
   fs.readFile(file, function (err, imageData) {
     if (!err) {

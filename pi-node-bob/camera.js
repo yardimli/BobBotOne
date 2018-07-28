@@ -31,7 +31,7 @@ module.exports = function Camera(){
         
         this.output(this.filename);
         
-        this.command = "raspistill";
+            this.command = "raspistill";
         
         for (key in this.parameters) {
             
