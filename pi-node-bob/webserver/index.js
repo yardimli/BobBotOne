@@ -57,7 +57,7 @@ function grayscale(input, output) {
 setInterval(function () {
   var img = document.getElementById('stream_container');
 
-  console.log(img.width);
+//  console.log(img.width);
 
   canvas.width = img.width;
   canvas.height = img.height;
@@ -97,46 +97,80 @@ function GetStatus() {
     url: UrlToGet,
     data: data,
     success: function (data, status) {
-      console.log("Status: " + status);
-      console.log(data);
-      if (LastStatusCheck == null) LastStatusCheck = data;
+      if (status == "success" && data.length > 0) {
+        console.log("Status: " + status);
+//        console.log(data);
 
-      $.each(data, function (key, value) {
-        console.log(key);
-        console.log(value);
-        key = 2;
 
-        $("#table_stream_" + key + "").addClass("highlight");
+        $.each(data, function (key, value) {
+          key = key+0;
+          console.log(key);
+//          console.log(value.data);
+          try {
+            var datajson = JSON.parse(value.data);
+//          console.log(datajson);
 
-        let key2 = key;
+            $("#table_stream_" + key + "").addClass("highlight");
 
-        clearTimeout(StatusTimeout[key2]);
+            let key2 = key;
+            clearTimeout(StatusTimeout[key2]);
+            StatusTimeout[key2] = setTimeout(function () {
+              $("#table_stream_" + key2 + "").removeClass("highlight");
+            }, 3000);
 
-        StatusTimeout[key2] = setTimeout(function () {
-          $("#table_stream_" + key2 + "").removeClass("highlight");
-        }, 5000);
-
-        /*
-            $("#table_stream_" + key + " td:nth-child(1)").html(value["servo"].servo_pos);
-            $("#table_stream_" + key + " td:nth-child(2)").html(value["preview"].upload_left);
-            $("#table_stream_" + key + " td:nth-child(3)").html(value["preview"].timestamp);
-            $("#table_stream_" + key + " td:nth-child(4)").html((Math.round(value["preview"].time_taken * 1000) / 1000));
-            $("#table_stream_" + key + " td:nth-child(5)").html('*');
-            $("#table_stream_" + key + " td:nth-child(6)").html((Math.round(value["preview"].capture_time * 1000) / 1000));
-            if (typeof value["fullsize"] != 'undefined') {
-                if ('time_taken' in value["fullsize"]) {
-                    $("#table_stream_" + key + " td:nth-child(7)").html((Math.round(value["fullsize"].time_taken * 1000) / 1000));
-                }
-                else {
-                    $("#table_stream_" + key + " td:nth-child(7)").html("?");
-                }
+            if (key <= 2) {
+              console.log(datajson["c"]);
+              $("#table_stream_" + key + " td:nth-child(1)").html(datajson["d"]);
+              $("#table_stream_" + key + " td:nth-child(2)").html(datajson["lb"]);
+              $("#table_stream_" + key + " td:nth-child(3)").html(datajson["rb"]);
+              $("#table_stream_" + key + " td:nth-child(4)").html(datajson["c"]);
+              $("#table_stream_" + key + " td:nth-child(5)").html(datajson["lh"]);
+              $("#table_stream_" + key + " td:nth-child(6)").html(datajson["rh"]);
             }
-            else {
-                $("#table_stream_" + key + " td:nth-child(7)").html("??");
-            }
-            $("#table_stream_" + key + " td:nth-child(8)").html(value["preview"].timestamp);
-        */
-      });
+          } catch(e) {
+            console.log(e);
+          };
+
+        });
+
+      }
+      // if (LastStatusCheck == null) LastStatusCheck = data;
+      //
+      // $.each(data, function (key, value) {
+      //   console.log(key);
+      //   console.log(value);
+      //   key = 2;
+      //
+      //   $("#table_stream_" + key + "").addClass("highlight");
+      //
+      //   let key2 = key;
+      //
+      //   clearTimeout(StatusTimeout[key2]);
+      //
+      //   StatusTimeout[key2] = setTimeout(function () {
+      //     $("#table_stream_" + key2 + "").removeClass("highlight");
+      //   }, 5000);
+
+      /*
+          $("#table_stream_" + key + " td:nth-child(1)").html(value["servo"].servo_pos);
+          $("#table_stream_" + key + " td:nth-child(2)").html(value["preview"].upload_left);
+          $("#table_stream_" + key + " td:nth-child(3)").html(value["preview"].timestamp);
+          $("#table_stream_" + key + " td:nth-child(4)").html((Math.round(value["preview"].time_taken * 1000) / 1000));
+          $("#table_stream_" + key + " td:nth-child(5)").html('*');
+          $("#table_stream_" + key + " td:nth-child(6)").html((Math.round(value["preview"].capture_time * 1000) / 1000));
+          if (typeof value["fullsize"] != 'undefined') {
+              if ('time_taken' in value["fullsize"]) {
+                  $("#table_stream_" + key + " td:nth-child(7)").html((Math.round(value["fullsize"].time_taken * 1000) / 1000));
+              }
+              else {
+                  $("#table_stream_" + key + " td:nth-child(7)").html("?");
+              }
+          }
+          else {
+              $("#table_stream_" + key + " td:nth-child(7)").html("??");
+          }
+          $("#table_stream_" + key + " td:nth-child(8)").html(value["preview"].timestamp);
+      */
 
       LastStatusCheck = data;
 
@@ -152,10 +186,14 @@ var cameraPreviewID = 0;
 $(document).ready(function () {
 //    document.body.webkitRequestFullScreen();
 
+  if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+    $("#stream_container").attr("src", "http://192.168.1.133:8080/video_stream.jpg?time=1&pDelay=120000");
+  }
+
   canvas = document.getElementById("image_process_canvas");
   context = canvas.getContext("2d");
 
-    var listener = new window.keypress.Listener();
+  var listener = new window.keypress.Listener();
 
   listener.register_combo({
     keys: "w", on_keyup: function () {

@@ -106,7 +106,7 @@ body {
 
 #consoletop {
     position:relative;
-    width: 90%;
+    width: 80%;
     top: 15px;
     margin-left:70px;
 }
@@ -122,4 +122,12 @@ body {
     font-size:18px;
     letter-spacing:1px;
     text-align:right;
+}
+
+.rotateImage90 {
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
 }

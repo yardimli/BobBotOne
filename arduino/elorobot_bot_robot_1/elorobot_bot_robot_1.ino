@@ -15,6 +15,7 @@ int RightBumper = 0;
 
 int LeftHeight = 0;
 int RightHeight = 0;
+
 bool FirstHeight = true;
 int FirstHeightCounter = 0;
 
@@ -35,15 +36,15 @@ int AutoDrive = false;
 DFRobotVL53L0X sensor;
 DFRobot_LCD lcd(16,2);
 
-Servo TOFServo;
+//Servo TOFServo;
 Servo CameraServo;
 
-int TOFPos = 0;
-int TOFMoving = false;
-int TOFNextMove = 0;
-int TOFGoTo = 90;
-int TOFPin = 9;
-int TOFScanDirection = 1;
+//int TOFPos = 0;
+//int TOFMoving = false;
+//int TOFNextMove = 0;
+//int TOFGoTo = 90;
+//int TOFPin = 9;
+//int TOFScanDirection = 1;
 
 
 int CameraPos = 0;
@@ -64,13 +65,18 @@ int LoopEnd = 0;
 int LifeCounter = 0;
 int LifeCounterX = 0;
 
-bool StartTOFScan = false;
+//bool StartTOFScan = false;
 
 
 int LastLeftBumper   = 0;
 int LastRightBumper  = 0;
 int LastLeftHeight   = 0;
 int LastRightHeight  = 0;
+
+int Read_Distance_Delay = 0;
+float Last_Distance = 0;
+float Current_Distance = 0;
+float Temp_Distance = 0;
 
 String LCDMsg = "";
 
@@ -159,7 +165,7 @@ void setup(void)
   Serial.begin(115200);      //Set Baud Rate
   Serial.println("{op:'start':mes:'Hello World'}");
 
-  TOFServo.attach(TOFPin);
+//  TOFServo.attach(TOFPin);
   CameraServo.attach(CameraPin);
   pinMode(8, INPUT); //Right Bumper
   pinMode(11, INPUT); //Left Bumper
@@ -216,64 +222,64 @@ void loop(void)
     LifeCounterX=0;
   }
 
-  if (StartTOFScan) {
-    //move scanner, find angle of longest free space
-    if (!TOFMoving) {
-      ScanDegrees[TOFPos] = sensor.getDistance();
-
-//      Serial.print(TOFPos);
-//      Serial.print("deg. distance: ");
-//      Serial.println(ScanDegrees[TOFPos]);
-
-      if (TOFScanDirection==1) { TOFGoTo = TOFGoTo + 5; }
-      if (TOFScanDirection==2) { TOFGoTo = TOFGoTo - 5; }
-      if (TOFGoTo>=170 || TOFGoTo<=10) {
-        Serial.print("{op:'scan_result',");
-
-	      Serial.print("dir:");
-	      Serial.print(TOFScanDirection);
-	      Serial.print(", scans: { ");
-
-
-        for (int scount = 1; scount <= 17; scount++) {
-          LoopStart = (scount*10)+1; 
-          LoopEnd = LoopStart+10; 
-  
-          ScanZoneTotal = 0;
-          for (int scount2 = LoopStart; scount2 < LoopEnd; scount2++) ScanZoneTotal += ScanDegrees[scount2];          
-          
-          int ScanZoneAvg = ScanZoneTotal/2;
-
-          ScanZones[scount]=ScanZoneAvg;
-
-		      Serial.print("{ start:");
-		      Serial.print(LoopStart);
-		      Serial.print(", ");
-
-		      Serial.print("end:");
-		      Serial.print(LoopEnd-1);
-		      Serial.print(", ");
-
-		      Serial.print("avg_dist:");
-		      Serial.print(ScanZoneAvg);
-		      Serial.print("} , ");
-        }
-
-        Serial.println("} }");
-        if (TOFGoTo>=170) {
-          TOFGoTo=170;
-          TOFScanDirection=2;
-        }
-
-        if (TOFGoTo<=10) { 
-          TOFGoTo = 10;
-          TOFScanDirection=1; 
-        }
-
-        for (int scount2 =  0; scount2 < 180; scount2++) ScanDegrees[scount2] = 0;
-      }
-    }
-  }
+//  if (StartTOFScan) {
+//    //move scanner, find angle of longest free space
+//    if (!TOFMoving) {
+//      ScanDegrees[TOFPos] = sensor.getDistance();
+//
+////      Serial.print(TOFPos);
+////      Serial.print("deg. distance: ");
+////      Serial.println(ScanDegrees[TOFPos]);
+//
+//      if (TOFScanDirection==1) { TOFGoTo = TOFGoTo + 5; }
+//      if (TOFScanDirection==2) { TOFGoTo = TOFGoTo - 5; }
+//      if (TOFGoTo>=170 || TOFGoTo<=10) {
+//        Serial.print("{op:'scan_result',");
+//
+//	      Serial.print("dir:");
+//	      Serial.print(TOFScanDirection);
+//	      Serial.print(", scans: { ");
+//
+//
+//        for (int scount = 1; scount <= 17; scount++) {
+//          LoopStart = (scount*10)+1;
+//          LoopEnd = LoopStart+10;
+//
+//          ScanZoneTotal = 0;
+//          for (int scount2 = LoopStart; scount2 < LoopEnd; scount2++) ScanZoneTotal += ScanDegrees[scount2];
+//
+//          int ScanZoneAvg = ScanZoneTotal/2;
+//
+//          ScanZones[scount]=ScanZoneAvg;
+//
+//		      Serial.print("{ start:");
+//		      Serial.print(LoopStart);
+//		      Serial.print(", ");
+//
+//		      Serial.print("end:");
+//		      Serial.print(LoopEnd-1);
+//		      Serial.print(", ");
+//
+//		      Serial.print("avg_dist:");
+//		      Serial.print(ScanZoneAvg);
+//		      Serial.print("} , ");
+//        }
+//
+//        Serial.println("} }");
+//        if (TOFGoTo>=170) {
+//          TOFGoTo=170;
+//          TOFScanDirection=2;
+//        }
+//
+//        if (TOFGoTo<=10) {
+//          TOFGoTo = 10;
+//          TOFScanDirection=1;
+//        }
+//
+//        for (int scount2 =  0; scount2 < 180; scount2++) ScanDegrees[scount2] = 0;
+//      }
+//    }
+//  }
 
 
   if (CameraPos!= CameraGoTo) {
@@ -298,27 +304,27 @@ void loop(void)
   }
 
 
-  if (TOFPos!= TOFGoTo) {
-    TOFMoving = true;
-    if (!TOFServo.attached() ) { TOFServo.attach(TOFPin); }
-
-    if (TOFServo.attached() ) {
-
-      TOFNextMove--;
-      if (TOFNextMove<=0) {
-        if (TOFPos < TOFGoTo) { TOFPos++; }
-        if (TOFPos > TOFGoTo) { TOFPos--; }
-//        Serial.print("Move TOF to :");
-//        Serial.println(TOFPos);
-        
-        TOFServo.write(TOFPos);
-        TOFNextMove = 5;
-      }
-    }
-    
-//    if (TOFPos == TOFGoTo && TOFServo.attached() ) { TOFServo.detach(); }
-    if (TOFPos == TOFGoTo) { TOFMoving = false; }
-  }
+//  if (TOFPos!= TOFGoTo) {
+//    TOFMoving = true;
+//    if (!TOFServo.attached() ) { TOFServo.attach(TOFPin); }
+//
+//    if (TOFServo.attached() ) {
+//
+//      TOFNextMove--;
+//      if (TOFNextMove<=0) {
+//        if (TOFPos < TOFGoTo) { TOFPos++; }
+//        if (TOFPos > TOFGoTo) { TOFPos--; }
+////        Serial.print("Move TOF to :");
+////        Serial.println(TOFPos);
+//
+//        TOFServo.write(TOFPos);
+//        TOFNextMove = 5;
+//      }
+//    }
+//
+////    if (TOFPos == TOFGoTo && TOFServo.attached() ) { TOFServo.detach(); }
+//    if (TOFPos == TOFGoTo) { TOFMoving = false; }
+//  }
 
 
 
@@ -331,6 +337,15 @@ void loop(void)
   LeftHeight = digitalRead(A3);
   RightHeight = digitalRead(A2);
 
+	Read_Distance_Delay++;
+	if (Read_Distance_Delay>5) {
+		Temp_Distance = sensor.getDistance();
+		if (Temp_Distance>120) {
+		  Current_Distance = Temp_Distance;
+		}
+	  Read_Distance_Delay = 0;
+	}
+
   kk++;
   if (kk>10) {
     mm++;
@@ -339,33 +354,41 @@ void loop(void)
       mm=0;
     }
 
+
     if ( (LastLeftBumper != LeftBumper) ||
          (LastRightBumper != RightBumper) ||
          (LastLeftHeight != LeftHeight) ||
-         (LastRightHeight != RightHeight) )
+         (LastRightHeight != RightHeight) ||
+         (Last_Distance != Current_Distance) )
     {
-      Serial.print("{op:'sensordata', cycle:");
+      Serial.print("{\"op\":\"sd\", \"c\":");
       Serial.print(mm);
       Serial.print(", ");
     
-      Serial.print("lb:");
+      Serial.print("\"lb\":");
       Serial.print(LeftBumper);
       Serial.print(", ");
-      Serial.print("rb:");
+      Serial.print("\"rb\":");
       Serial.print(RightBumper);
       Serial.print(", ");
     
-      Serial.print("lh:");
+      Serial.print("\"lh\":");
       Serial.print(LeftHeight);
       Serial.print(", ");
-      Serial.print("rh:");
+      Serial.print("\"rh\":");
       Serial.print(RightHeight);
+
+			Serial.print(", ");
+			Serial.print("\"d\":");
+			Serial.print(Current_Distance);
+
       Serial.println("}");
 
 	    LastLeftBumper   = LeftBumper;
 	    LastRightBumper  = RightBumper;
 	    LastLeftHeight   = LeftHeight;
 	    LastRightHeight  = RightHeight;
+	    Last_Distance = Current_Distance;
     }
   }
 
@@ -375,7 +398,7 @@ void loop(void)
   if (RightHeight == LOW) { LCDMsg = "Right H"; }
 
 
-  if (LeftBumper == LOW || RightBumper == LOW || LeftHeight == LOW || RightHeight == LOW) {
+  if (LeftBumper == LOW || RightBumper == LOW || LeftHeight == LOW || RightHeight == LOW || ( Current_Distance<850 && Current_Distance>120)) {
     RepeatTurnLCounter=0;
     RepeatTurnRCounter=0;
 
@@ -427,15 +450,15 @@ void loop(void)
       CameraGoTo = FirstInt;
     } else
 
-    if (strcmp(messageFromPC, "Scan_GoTo") == 0) {
-      Serial.print("{op:'scan_goto', ");
-      Serial.print("CurrentValue:");
-      Serial.print(TOFGoTo);
-      Serial.print(", CurrentPos:");
-      Serial.print(TOFPos);
-      Serial.println("}");
-      TOFGoTo = FirstInt;
-    } else
+//    if (strcmp(messageFromPC, "Scan_GoTo") == 0) {
+//      Serial.print("{op:'scan_goto', ");
+//      Serial.print("CurrentValue:");
+//      Serial.print(TOFGoTo);
+//      Serial.print(", CurrentPos:");
+//      Serial.print(TOFPos);
+//      Serial.println("}");
+//      TOFGoTo = FirstInt;
+//    } else
 
     if (strcmp(messageFromPC, "Advance") == 0) {
         Serial.print("{op:'advance', ");
@@ -534,12 +557,12 @@ void loop(void)
         if (SecondInt<10) { delay(100); }
     } else
 
-    if (strcmp(messageFromPC, "Switch_Scan") == 0) {
-        StartTOFScan = !StartTOFScan;
-        Serial.print("{op:'switch_scan', value:");
-        Serial.print(StartTOFScan);
-        Serial.println("}");
-    } else
+//    if (strcmp(messageFromPC, "Switch_Scan") == 0) {
+//        StartTOFScan = !StartTOFScan;
+//        Serial.print("{op:'switch_scan', value:");
+//        Serial.print(StartTOFScan);
+//        Serial.println("}");
+//    } else
 
     if (strcmp(messageFromPC, "Current_Distance") == 0) {
         Serial.print("{op:'distance', value:");
@@ -549,14 +572,14 @@ void loop(void)
 
     if (strcmp(messageFromPC, "Sweep_Servos") == 0) {
         if (CameraGoTo==0) { CameraGoTo = 180; } else { CameraGoTo = 0; }
-        if (TOFGoTo==0) { TOFGoTo = 180; } else { TOFGoTo = 0; }
+//        if (TOFGoTo==0) { TOFGoTo = 180; } else { TOFGoTo = 0; }
 
         Serial.println("{op:'sweep_servo', msg:'Sweeping Servos'}");
     } else
 
     if (strcmp(messageFromPC, "Home_Servos") == 0) {
         CameraGoTo = 90;
-        TOFGoTo = 90;
+//        TOFGoTo = 90;
 
         Serial.println("{op:'servo_to', msg:'Servo to 90'}");
     }
@@ -567,7 +590,7 @@ void loop(void)
         RepeatTurnLCounter=0;
         RepeatTurnRCounter=0;
 
-        if (TOFServo.attached() ) { TOFServo.detach(); }
+//        if (TOFServo.attached() ) { TOFServo.detach(); }
         if (CameraServo.attached() ) { CameraServo.detach(); }
 
         Serial.println("{op:'stop', msg:'stop all'}");

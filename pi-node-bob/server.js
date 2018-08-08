@@ -78,7 +78,7 @@ function startSerialControl() {
     console.log("starting serial/server tunnel now.");
     log_to_file("starting serial/server tunnel now.");
 
-    serial_tunnel = child_process.fork('./raspberry-pi-mjpeg-server.js', ['-w', '820', '-l', '616', '-q', '10'], {silent: true});
+    serial_tunnel = child_process.fork('./raspberry-pi-mjpeg-server.js', ['-w', '820', '-l', '616', '-q', '15'], {silent: true});
 
     serial_tunnel.stdout.on('data', function (data) {
       log_to_file("serial/server tunnel =>" + data);

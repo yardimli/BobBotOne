@@ -398,5 +398,6 @@ camera
   .timelapse(timeout) // how often we should capture an image
   .width(width)
   .height(height)
+//  .rotation(90)
   .quality(quality)
   .takePicture(tmpImage);
