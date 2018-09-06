@@ -31,10 +31,10 @@ int AutoDrive = false;
 #include "Arduino.h"
 #include "Wire.h"
 #include "DFRobot_VL53L0X.h"
-#include "DFRobot_LCD.h"
+//#include "DFRobot_LCD.h"
 
 DFRobotVL53L0X sensor;
-DFRobot_LCD lcd(16,2);
+//DFRobot_LCD lcd(16,2);
 
 //Servo TOFServo;
 Servo CameraServo;
@@ -62,8 +62,8 @@ int ScanZoneTotal = 0;
 int LoopStart = 0;
 int LoopEnd = 0;
 
-int LifeCounter = 0;
-int LifeCounterX = 0;
+//int LifeCounter = 0;
+//int LifeCounterX = 0;
 
 //bool StartTOFScan = false;
 
@@ -78,7 +78,7 @@ float Last_Distance = 0;
 float Current_Distance = 0;
 float Temp_Distance = 0;
 
-String LCDMsg = "";
+//String LCDMsg = "";
 
 int RepeatTurnLCounter = 0;
 int RepeatTurnLCounterSpeed = 0;
@@ -183,8 +183,8 @@ void setup(void)
   //Laser rangefinder begins to work
   sensor.start();
 
-  lcd.init();
-  lcd.print("hello world");
+//  lcd.init();
+//  lcd.print("hello world");
 
   for (int scount =  0; scount < 180; scount++) { ScanDegrees[scount] = 0; }
 }
@@ -201,26 +201,26 @@ void loop(void)
     stop();
   }
 
-  LifeCounterX++;
-  if (LifeCounterX>500) {
-    int r = random(255);
-    int g = random(255);
-    int b = random(255);
-    lcd.setRGB(r, g, b);
-    LifeCounter++;
-    lcd.setCursor(0,1);
-    if (LCDMsg!="") {
-      lcd.print(LCDMsg);
-      LCDMsg = "";
-    } else
-    {
-      lcd.print(LifeCounter);
-      lcd.print(" ");
-      lcd.print(StopAfterN);
-      lcd.print("        ");
-    }
-    LifeCounterX=0;
-  }
+//  LifeCounterX++;
+//  if (LifeCounterX>500) {
+//    LifeCounter++;
+//    LifeCounterX=0;
+//    int r = random(255);
+//    int g = random(255);
+//    int b = random(255);
+//    lcd.setRGB(r, g, b);
+//    lcd.setCursor(0,1);
+//    if (LCDMsg!="") {
+//      lcd.print(LCDMsg);
+//      LCDMsg = "";
+//    } else
+//    {
+//      lcd.print(LifeCounter);
+//      lcd.print(" ");
+//      lcd.print(StopAfterN);
+//      lcd.print("        ");
+//    }
+//  }
 
 //  if (StartTOFScan) {
 //    //move scanner, find angle of longest free space
@@ -392,10 +392,10 @@ void loop(void)
     }
   }
 
-  if (LeftBumper == LOW) { LCDMsg = "Left B"; }
-  if (RightBumper == LOW) { LCDMsg = "Right B"; }
-  if (LeftHeight == LOW) { LCDMsg = "Left H"; }
-  if (RightHeight == LOW) { LCDMsg = "Right H"; }
+//  if (LeftBumper == LOW) { LCDMsg = "Left B"; }
+//  if (RightBumper == LOW) { LCDMsg = "Right B"; }
+//  if (LeftHeight == LOW) { LCDMsg = "Left H"; }
+//  if (RightHeight == LOW) { LCDMsg = "Right H"; }
 
 
   if (LeftBumper == LOW || RightBumper == LOW || LeftHeight == LOW || RightHeight == LOW || ( Current_Distance<850 && Current_Distance>120)) {
@@ -429,17 +429,6 @@ void loop(void)
   if (newDataFromPC) {
     newDataFromPC = false;
 
-    if (strcmp(messageFromPC, "LCD") == 0) {
-      Serial.print("{op:'lcd', ");
-      Serial.print("set text to:");
-      Serial.print(StringMessage);
-      Serial.println("}");
-
-	    lcd.setRGB(255, 255, 255);
-	    lcd.setCursor(FirstInt,SecondInt);
-      lcd.print(StringMessage);
-    } else
-
     if (strcmp(messageFromPC, "Camera_GoTo") == 0) {
       Serial.print("{op:'camera_goto', ");
       Serial.print("CurrentValue:");
@@ -449,16 +438,6 @@ void loop(void)
       Serial.println("}");
       CameraGoTo = FirstInt;
     } else
-
-//    if (strcmp(messageFromPC, "Scan_GoTo") == 0) {
-//      Serial.print("{op:'scan_goto', ");
-//      Serial.print("CurrentValue:");
-//      Serial.print(TOFGoTo);
-//      Serial.print(", CurrentPos:");
-//      Serial.print(TOFPos);
-//      Serial.println("}");
-//      TOFGoTo = FirstInt;
-//    } else
 
     if (strcmp(messageFromPC, "Advance") == 0) {
         Serial.print("{op:'advance', ");
@@ -474,7 +453,7 @@ void loop(void)
 
         RepeatTurnLCounter=0;
         RepeatTurnRCounter=0;
-        if (SecondInt<10) { delay(100); }
+        if (SecondInt<10) { delay(250); }
     } else
 
     if (strcmp(messageFromPC, "Back_Off") == 0) {
@@ -491,36 +470,7 @@ void loop(void)
 
         RepeatTurnLCounter=0;
         RepeatTurnRCounter=0;
-        if (SecondInt<10) { delay(100); }
-    } else
-
-
-    if (strcmp(messageFromPC, "Repeat_L") == 0) {
-        Serial.print("{op:'repeat_turn_l', ");
-        Serial.print("speed:");
-        Serial.print(FirstInt);
-        Serial.print(", count:");
-        Serial.print(SecondInt);
-        Serial.println("}");
-
-        if (FirstInt>128) { FirstInt=128; }
-        if (SecondInt>40) { SecondInt=40; }
-        RepeatTurnLCounterSpeed = FirstInt;
-		    RepeatTurnLCounter = SecondInt;
-    } else
-
-    if (strcmp(messageFromPC, "Repeat_R") == 0) {
-        Serial.print("{op:'repeat_turn_r', ");
-        Serial.print("speed:");
-        Serial.print(FirstInt);
-        Serial.print(", count:");
-        Serial.print(SecondInt);
-        Serial.println("}");
-
-        if (FirstInt>128) { FirstInt=128; }
-        if (SecondInt>40) { SecondInt=40; }
-        RepeatTurnRCounterSpeed = FirstInt;
-		    RepeatTurnRCounter = SecondInt;
+        if (SecondInt<10) { delay(250); }
     } else
 
     if (strcmp(messageFromPC, "Turn_L") == 0) {
@@ -537,7 +487,7 @@ void loop(void)
 
         RepeatTurnLCounter=0;
         RepeatTurnRCounter=0;
-        if (SecondInt<10) { delay(100); }
+        if (SecondInt<10) { delay(400); }
     } else
 
     if (strcmp(messageFromPC, "Turn_R") == 0) {
@@ -554,15 +504,36 @@ void loop(void)
 
         RepeatTurnLCounter=0;
         RepeatTurnRCounter=0;
-        if (SecondInt<10) { delay(100); }
+        if (SecondInt<10) { delay(400); }
     } else
 
-//    if (strcmp(messageFromPC, "Switch_Scan") == 0) {
-//        StartTOFScan = !StartTOFScan;
-//        Serial.print("{op:'switch_scan', value:");
-//        Serial.print(StartTOFScan);
-//        Serial.println("}");
-//    } else
+    if (strcmp(messageFromPC, "Repeat_L") == 0) {
+        Serial.print("{op:'repeat_turn_l', ");
+        Serial.print("speed:");
+        Serial.print(FirstInt);
+        Serial.print(", count:");
+        Serial.print(SecondInt);
+        Serial.println("}");
+
+        if (FirstInt>255) { FirstInt=255; }
+        if (SecondInt>40) { SecondInt=40; }
+        RepeatTurnLCounterSpeed = FirstInt;
+		    RepeatTurnLCounter = SecondInt;
+    } else
+
+    if (strcmp(messageFromPC, "Repeat_R") == 0) {
+        Serial.print("{op:'repeat_turn_r', ");
+        Serial.print("speed:");
+        Serial.print(FirstInt);
+        Serial.print(", count:");
+        Serial.print(SecondInt);
+        Serial.println("}");
+
+        if (FirstInt>255) { FirstInt=255; }
+        if (SecondInt>40) { SecondInt=40; }
+        RepeatTurnRCounterSpeed = FirstInt;
+		    RepeatTurnRCounter = SecondInt;
+    } else
 
     if (strcmp(messageFromPC, "Current_Distance") == 0) {
         Serial.print("{op:'distance', value:");
@@ -595,6 +566,35 @@ void loop(void)
 
         Serial.println("{op:'stop', msg:'stop all'}");
     }
+
+//    else
+//    if (strcmp(messageFromPC, "Switch_Scan") == 0) {
+//        StartTOFScan = !StartTOFScan;
+//        Serial.print("{op:'switch_scan', value:");
+//        Serial.print(StartTOFScan);
+//        Serial.println("}");
+//    } else
+//
+//    if (strcmp(messageFromPC, "LCD") == 0) {
+//      Serial.print("{op:'lcd', ");
+//      Serial.print("set text to:");
+//      Serial.print(StringMessage);
+//      Serial.println("}");
+//
+//	    lcd.setRGB(255, 255, 255);
+//	    lcd.setCursor(FirstInt,SecondInt);
+//      lcd.print(StringMessage);
+//    } else
+//
+//    if (strcmp(messageFromPC, "Scan_GoTo") == 0) {
+//      Serial.print("{op:'scan_goto', ");
+//      Serial.print("CurrentValue:");
+//      Serial.print(TOFGoTo);
+//      Serial.print(", CurrentPos:");
+//      Serial.print(TOFPos);
+//      Serial.println("}");
+//      TOFGoTo = FirstInt;
+//    }
   }
 
   delay(5);

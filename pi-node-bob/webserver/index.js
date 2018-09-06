@@ -197,7 +197,7 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "w", on_keyup: function () {
-      var QData = "<Advance,96,120,msg>";
+      var QData = "<Advance,255,120,msg>";
       var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
@@ -207,7 +207,7 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "s", on_keyup: function () {
-      var QData = "<Back_Off,96,60,msg>";
+      var QData = "<Back_Off,255,60,msg>";
       var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
@@ -217,7 +217,7 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "q", on_keyup: function () {
-      var QData = "<Turn_L,96,20,msg>";
+      var QData = "<Turn_L,255,35,msg>";
       var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
@@ -227,7 +227,7 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "e", on_keyup: function () {
-      var QData = "<Turn_R,96,20,msg>";
+      var QData = "<Turn_R,255,35,msg>";
       var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
@@ -237,7 +237,8 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "a", on_keyup: function () {
-      var QData = "<Repeat_L,96,25,msg>";
+      var QData = "<Turn_L,255,90,msg>";
+//      var QData = "<Repeat_L,255,55,msg>";
       var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
@@ -247,7 +248,8 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "d", on_keyup: function () {
-      var QData = "<Repeat_R,96,25,msg>";
+      var QData = "<Turn_R,255,90,msg>";
+//      var QData = "<Repeat_R,255,55,msg>";
       var UrlToGet = "/write_data?q=" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
