@@ -17,7 +17,7 @@ function log_to_file(logstr) {
 log_to_file("===================================================================");
 log_to_file("starting lt_video.js");
 
-var tunnel = localtunnel(8080, {host: 'http://codeplay.me', subdomain: 'video'}, function (err, tunnel) {
+var tunnel = localtunnel(8080, {host: 'http://codeplay.me', subdomain: 'video2'}, function (err, tunnel) {
   console.log(tunnel.url);
   log_to_file(tunnel.url);
 });

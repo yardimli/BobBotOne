@@ -16,9 +16,22 @@ raspi.init(() => {
 
   i2c.writeSync(0x10,0x02,buf);
 
+  setInterval( function () {
+
+    var faceID = Math.floor(Math.random() * Math.floor(22));
+    var colorID = Math.floor(Math.random() * Math.floor(6));
+    buf[0] = (buf[0] & (0xe6)) | (0x02 << 3);
+    buf[1] = colorID;//color;
+    buf[2] = 3;//x;
+    buf[3] = 1;//y;
+    buf[4] = faceID;//y;
+    console.log(faceID+" "+colorID);
+
+    i2c.writeSync(0x10,0x02,buf);
+  },2000);
 
   buf[0] = (buf[0] & (0xe6)) | (0x02 << 3);
-  buf[1] = 4;//color;
+  buf[1] = 3;//color;
   buf[2] = 3;//x;
   buf[3] = 1;//y;
   buf[4] = 17;//y;

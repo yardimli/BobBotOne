@@ -35,21 +35,21 @@ log_to_file("starting server.js");
 
 function startVideoTunnel() {
   clearTimeout(startVideoTunnel_timeout);
-  log_to_file("starting video.codeplay.me tunnel in 10 sec");
+  log_to_file("starting video2.codeplay.me tunnel in 10 sec");
 
   startVideoTunnel_timeout = setTimeout(function () {
-    console.log("starting video.codeplay.me tunnel now.");
-    log_to_file("starting video.codeplay.me tunnel now.");
+    console.log("starting video2.codeplay.me tunnel now.");
+    log_to_file("starting video2.codeplay.me tunnel now.");
 
     video_tunnel = child_process.fork('./lt_video.js', [], {silent: true});
 
     video_tunnel.stdout.on('data', function (data) {
-      log_to_file("video.codeplay.me tunnel =>" + data);
+      log_to_file("video2.codeplay.me tunnel =>" + data);
     });
 
     video_tunnel.stderr.on('data', function (data) {
-      console.log("video.codeplay.me tunnel error =>" + data);
-      log_to_file("video.codeplay.me tunnel error =>" + data);
+      console.log("video2.codeplay.me tunnel error =>" + data);
+      log_to_file("video2.codeplay.me tunnel error =>" + data);
     });
 
     StartVideoTesting = true;
@@ -58,10 +58,10 @@ function startVideoTunnel() {
 
 function killVideoTunnel() {
   clearTimeout(killVideoTunnel_timeout);
-  log_to_file("killing video.codeplay.me tunnel in 5 sec.");
+  log_to_file("killing video2.codeplay.me tunnel in 5 sec.");
   killVideoTunnel_timeout = setTimeout(function () {
-    console.log("killing video.codeplay.me tunnel now.");
-    log_to_file("killing video.codeplay.me tunnel now.");
+    console.log("killing video2.codeplay.me tunnel now.");
+    log_to_file("killing video2.codeplay.me tunnel now.");
 
     video_tunnel.kill();
 
@@ -112,8 +112,8 @@ function CheckWebReach() {
   let data = "";
   let test_video_req;
   if (StartVideoTesting) {
-    log_to_file("testing video.codeplay.me reachablity.");
-    test_video_req = http.get("http://video.codeplay.me/webserver/status.html", function (res) {
+    log_to_file("testing video2.codeplay.me reachablity.");
+    test_video_req = http.get("http://video2.codeplay.me/webserver/status.html", function (res) {
 
 //      console.log("statusCode: ", res.statusCode); // <======= Here's the status code
 //      console.log("headers: ", res.headers);
@@ -130,11 +130,11 @@ function CheckWebReach() {
 
       res.on('end', function () {
         if (data === "system check") {
-          log_to_file("video.codeplay.me reachability test GOOD.")
+          log_to_file("video2.codeplay.me reachability test GOOD.")
         }
         else {
-          console.log("cant reach myself at video.codeplay.me, restarting service ");
-          log_to_file("cant reach myself at video.codeplay.me, restarting service ");
+          console.log("cant reach myself at video2.codeplay.me, restarting service ");
+          log_to_file("cant reach myself at video2.codeplay.me, restarting service ");
           killVideoTunnel();
         }
       });
@@ -143,16 +143,16 @@ function CheckWebReach() {
 
     test_video_req.on("error", function (error) {
       console.log(error.status);
-      console.log("http request error. cant reach myself at video.codeplay.me, restarting service ");
+      console.log("http request error. cant reach myself at video2.codeplay.me, restarting service ");
 
       log_to_file(error.status);
-      log_to_file("http request error. cant reach myself at video.codeplay.me, restarting service ");
+      log_to_file("http request error. cant reach myself at video2.codeplay.me, restarting service ");
       killVideoTunnel();
     });
 
     test_video_req.setTimeout(15000, function () {
-      console.log("15 sec timeout. cant reach myself at video.codeplay.me, restarting service ");
-      log_to_file("15 sec timeout. cant reach myself at video.codeplay.me, restarting service ");
+      console.log("15 sec timeout. cant reach myself at video2.codeplay.me, restarting service ");
+      log_to_file("15 sec timeout. cant reach myself at video2.codeplay.me, restarting service ");
       killVideoTunnel();
     });
   }

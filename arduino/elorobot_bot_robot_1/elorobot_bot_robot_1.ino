@@ -1,5 +1,31 @@
 //Standard PWM DC control
-//v20
+//v21
+
+#include <Servo.h>
+#include "Arduino.h"
+#include "Wire.h"
+#include "DFRobot_VL53L0X.h"
+//#include "DFRobot_LCD.h"
+
+DFRobotVL53L0X sensor;
+//DFRobot_LCD lcd(16,2);
+
+//Servo TOFServo;
+Servo CameraServo;
+
+
+int RightBumperPin = A2;
+int LeftBumperPin = A3;
+int RightFloorPin = A4;
+int LeftFloorPin = A5;
+
+int CameraPos = 0;
+int CameraMoving = false;
+int CameraNextMove = 0;
+int CameraGoTo = 90;
+int CameraPin = 10;
+
+
 int E1 = 5;     //M1 Speed Control
 int E2 = 6;     //M2 Speed Control
 int M1 = 4;    //M1 Direction Control
@@ -27,18 +53,6 @@ int AutoDrive = false;
 //int M1 = 7;    //M1 Direction Control
 //int M2 = 8;    //M1 Direction Control
 
-#include <Servo.h>
-#include "Arduino.h"
-#include "Wire.h"
-#include "DFRobot_VL53L0X.h"
-//#include "DFRobot_LCD.h"
-
-DFRobotVL53L0X sensor;
-//DFRobot_LCD lcd(16,2);
-
-//Servo TOFServo;
-Servo CameraServo;
-
 //int TOFPos = 0;
 //int TOFMoving = false;
 //int TOFNextMove = 0;
@@ -46,21 +60,13 @@ Servo CameraServo;
 //int TOFPin = 9;
 //int TOFScanDirection = 1;
 
+//int ScanDegrees[190];
+//int ScanZones[18];
+//int ScanZonesPos = 0;
+//int ScanZoneTotal = 0;
 
-int CameraPos = 0;
-int CameraMoving = false;
-int CameraNextMove = 0;
-int CameraGoTo = 90;
-int CameraPin = 10;
-
-
-int ScanDegrees[190];
-int ScanZones[18];
-int ScanZonesPos = 0;
-int ScanZoneTotal = 0;
-
-int LoopStart = 0;
-int LoopEnd = 0;
+//int LoopStart = 0;
+//int LoopEnd = 0;
 
 //int LifeCounter = 0;
 //int LifeCounterX = 0;
@@ -167,11 +173,12 @@ void setup(void)
 
 //  TOFServo.attach(TOFPin);
   CameraServo.attach(CameraPin);
-  pinMode(8, INPUT); //Right Bumper
-  pinMode(11, INPUT); //Left Bumper
 
-  pinMode(A3, INPUT); //Right Height Sensor
-  pinMode(A2, INPUT); //Left Height Sensor
+  pinMode(RightBumperPin, INPUT); //Right Bumper
+  pinMode(LeftBumperPin, INPUT); //Left Bumper
+
+  pinMode(RightFloorPin, INPUT); //Right Height Sensor
+  pinMode(LeftFloorPin, INPUT); //Left Height Sensor
 
 
   //join i2c bus (address optional for master)
@@ -186,7 +193,7 @@ void setup(void)
 //  lcd.init();
 //  lcd.print("hello world");
 
-  for (int scount =  0; scount < 180; scount++) { ScanDegrees[scount] = 0; }
+//  for (int scount =  0; scount < 180; scount++) { ScanDegrees[scount] = 0; }
 }
 
 
@@ -328,14 +335,12 @@ void loop(void)
 
 
 
-  
-  
 
-  LeftBumper = digitalRead(11);
-  RightBumper = digitalRead(8);
+  LeftBumper = digitalRead(LeftBumperPin);
+  RightBumper = digitalRead(RightBumperPin);
 
-  LeftHeight = digitalRead(A3);
-  RightHeight = digitalRead(A2);
+  LeftHeight = digitalRead(LeftFloorPin);
+  RightHeight = digitalRead(RightFloorPin);
 
 	Read_Distance_Delay++;
 	if (Read_Distance_Delay>5) {

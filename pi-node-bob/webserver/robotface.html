@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+  <title>Elo Fox One</title>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+  <meta http-equiv="refresh" content="1800; url=robotface.html">
+
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+
+  <script src="js/jquery-1.11.3.min.js" type="text/javascript" charset="utf-8"></script>
+
+  <link href="css/bootstrap.css" rel="stylesheet" type="text/css">
+  <script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+
+  <link href='https://fonts.googleapis.com/css?family=Oswald:400' rel='stylesheet' type='text/css'>
+
+  <link rel="icon" type="image/png" href="/webserver/favicon.ico">
+</head>
+
+<body style=" background: lightblue; margin:0px; padding:0px;">
+<canvas id="canvas" width="420px" height="420px" style="background: #fff; margin:0px"></canvas>
+</body>
+
+<script>
+  var canvas = document.getElementById("canvas");
+  var context = canvas.getContext("2d");
+  var bw = window.innerWidth;
+  var bh = window.innerHeight;
+  var p = 0;
+
+  var Highlights = [];
+  var MouseCurrentX = 0;
+  var MouseCurrentY = 0;
+  var LastMouseCurrentX = 0;
+  var LastMouseCurrentY = 0;
+
+  $(document).ready(function () {
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    setTimeout(function () {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      bw = window.innerWidth;
+      bh = window.innerHeight;
+      drawLED();
+      drawBoard();
+    }, 2000);
+
+    canvas.addEventListener('mousemove', function (evt) {
+      var mousePos = getMousePos(canvas, evt);
+
+      MouseCurrentX = Math.floor(mousePos.x / 40);
+      MouseCurrentY = Math.floor(mousePos.y / 40);
+
+      if (MouseCurrentX !== LastMouseCurrentX || MouseCurrentY !== LastMouseCurrentY) {
+        LastMouseCurrentX = MouseCurrentX;
+        LastMouseCurrentY = MouseCurrentY
+        var message = 'Mouse position: ' + MouseCurrentX + ',' + MouseCurrentY;
+
+        drawLED();
+        drawBoard();
+//        writeMessage(canvas, message);
+      }
+    }, false);
+
+
+    canvas.addEventListener('click', function (event) {
+//	console.log("click");
+
+      var DeleteDot = false;
+      for (var i = 0; i < Highlights.length; i++) {
+        if (Highlights[i].X == MouseCurrentX && Highlights[i].Y == MouseCurrentY) {
+          Highlights.splice(i, 1);
+          DeleteDot = true;
+          break;
+        }
+      }
+
+      if (!DeleteDot) {
+        Highlights.push({X: MouseCurrentX, Y: MouseCurrentY});
+      }
+
+      drawLED();
+      drawBoard();
+//      writeMessage(canvas, message);
+
+//  console.log(Highlights);
+    }, false);
+
+
+    function writeMessage(canvas, message) {
+//  var context = canvas.getContext('2d');
+//  context.clearRect(0, 0, canvas.width, canvas.height);
+      context.font = '12pt Calibri';
+      context.fillStyle = 'white';
+      context.fillText(message, 10, 25);
+    }
+
+    function getMousePos(canvas, evt) {
+      var rect = canvas.getBoundingClientRect();
+      return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+      };
+    }
+
+    function drawLED() {
+      var grd;
+
+      for (var y = 0; y <= bh; y += 40) {
+        for (var x = 0; x <= bw; x += 40) {
+          grd = context.createLinearGradient(0.5 + x, 0.5 + y, 0.5 + x + 40, 0.5 + y + 40);
+
+          if ((y / 40) === MouseCurrentY && (x / 40) === MouseCurrentX) {
+            grd.addColorStop(0, "red");
+            grd.addColorStop(1, "#333");
+          }
+          else {
+            grd.addColorStop(0, "#000");
+            grd.addColorStop(1, "#333");
+          }
+
+          context.fillStyle = grd;
+          context.fillRect(0.5 + x, 0.5 + y, 40, 40);
+        }
+      }
+
+//    console.log(Highlights.length);
+      for (var i = 0; i < Highlights.length; i++) {
+
+        grd = context.createLinearGradient(
+          0.5 + (Highlights[i].X * 40),
+          0.5 + (Highlights[i].Y * 40),
+          0.5 + 40 + (Highlights[i].X * 40),
+          0.5 + 40 + (Highlights[i].Y * 40));
+        grd.addColorStop(0, "yellow");
+        grd.addColorStop(1, "#333");
+
+        context.fillStyle = grd;
+        context.fillRect(
+          0.5 + (Highlights[i].X * 40),
+          0.5 + (Highlights[i].Y * 40),
+          40,
+          40);
+
+//   if ( array[i] === 5) {
+//     arr.splice(i, 1);
+//   }
+      }
+
+
+    }
+
+
+    function drawBoard() {
+
+      for (var x = 0; x <= bw; x += 40) {
+        context.moveTo(0.5 + x + p, p);
+        context.lineTo(0.5 + x + p, bh + p);
+      }
+
+
+      for (var x = 0; x <= bh; x += 40) {
+        context.moveTo(p, 0.5 + x + p);
+        context.lineTo(bw + p, 0.5 + x + p);
+      }
+
+      context.strokeStyle = "black";
+      context.stroke();
+    }
+  });
+</script>
