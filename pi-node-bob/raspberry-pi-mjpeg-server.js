@@ -13,6 +13,9 @@ var fs = require("fs"),
   program = require('commander'),
   pjson = require('./package.json');
 
+var ifaces = os.networkInterfaces();
+
+
 var serialport = require("serialport");
 var qs = require("querystring");
 
@@ -27,6 +30,28 @@ function log_to_file(logstr) {
     }
   });
 }
+
+
+Object.keys(ifaces).forEach(function (ifname) {
+  var alias = 0;
+
+  ifaces[ifname].forEach(function (iface) {
+    if ('IPv4' !== iface.family || iface.internal !== false) {
+      // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+      return;
+    }
+
+    if (alias >= 1) {
+      // this single interface has multiple ipv4 addresses
+      console.log(ifname + ':' + alias, iface.address);
+    }
+    else {
+      // this interface has only one ipv4 adress
+      console.log(ifname, iface.address);
+    }
+    ++alias;
+  });
+});
 
 
 log_to_file("===================================================================");
@@ -115,77 +140,222 @@ var port = program.port || 8080,
  */
 var server = http.createServer(function (req, res) {
 
-  var queryData = url.parse(req.url, true);
+    var queryData = url.parse(req.url, true);
 
-  const xpath = queryData.pathname, query = queryData.query;
-  const method = req.method;
+    const xpath = queryData.pathname, query = queryData.query;
+    const method = req.method;
 
-  log_to_file("Request received on: " + xpath + "method: " + method + " query: " + JSON.stringify(query));
+    log_to_file("Request received on: " + xpath + "method: " + method + " query: " + JSON.stringify(query));
 //  console.log('query: ', query);
 
-  if (req.method === 'OPTIONS') {
-    res.writeHead(200);
-    res.end();
-    return;
-  }
+    if (req.method === 'OPTIONS') {
+      res.writeHead(200);
+      res.end();
+      return;
+    }
 
 
-  var contentType = 'text/html';
-  //classic web server
-  //---------------------------------------
-  if (xpath.indexOf("/webserver") !== -1) {
-    var filePath = '.' + req.url;
+    var contentType = 'text/html';
+    //classic web server
+    //---------------------------------------
+    if (xpath.indexOf("/webserver") !== -1) {
+      var filePath = '.' + req.url;
 //    if (filePath === './webserver') filePath = './webserver/index.html';
 
-    var extname = path.extname(filePath);
-    switch (extname) {
-      case '.js':
-        contentType = 'text/javascript';
-        break;
-      case '.css':
-        contentType = 'text/css';
-        break;
-      case '.json':
-        contentType = 'application/json';
-        break;
-      case '.png':
-        contentType = 'image/png';
-        break;
-      case '.jpg':
-        contentType = 'image/jpg';
-        break;
-      case '.wav':
-        contentType = 'audio/wav';
-        break;
-    }
+      var extname = path.extname(filePath);
+      switch (extname) {
+        case '.js':
+          contentType = 'text/javascript';
+          break;
+        case '.css':
+          contentType = 'text/css';
+          break;
+        case '.json':
+          contentType = 'application/json';
+          break;
+        case '.png':
+          contentType = 'image/png';
+          break;
+        case '.jpg':
+          contentType = 'image/jpg';
+          break;
+        case '.wav':
+          contentType = 'audio/wav';
+          break;
+      }
 
-    if (!fs.existsSync(filePath) || (!fs.lstatSync(filePath).isFile())) {
-      log_to_file(filePath + " doesnt exist.");
-      fs.readFile('./404.html', function (error, content) {
-        res.writeHead(200, {'Content-Type': contentType});
-        res.end(content, 'utf-8');
-      });
-    }
+      if (!fs.existsSync(filePath) || (!fs.lstatSync(filePath).isFile())) {
+        log_to_file(filePath + " doesnt exist.");
+        fs.readFile('./404.html', function (error, content) {
+          res.writeHead(200, {'Content-Type': contentType});
+          res.end(content, 'utf-8');
+        });
+      }
 
-    fs.readFile(filePath, function (error, content) {
-      if (error) {
-        if (error.code == 'ENOENT') {
-          log_to_file(filePath + " doesnt exist (2).");
-          fs.readFile('./404.html', function (error, content) {
-            res.writeHead(200, {'Content-Type': contentType});
-            res.end(content, 'utf-8');
-          });
+      fs.readFile(filePath, function (error, content) {
+        if (error) {
+          if (error.code == 'ENOENT') {
+            log_to_file(filePath + " doesnt exist (2).");
+            fs.readFile('./404.html', function (error, content) {
+              res.writeHead(200, {'Content-Type': contentType});
+              res.end(content, 'utf-8');
+            });
+          }
+          else {
+            log_to_file(filePath + " doesnt exist (3).");
+            res.writeHead(500);
+            res.end('Sorry, check with the site admin for error: ' + error.code + ' ..\n');
+            res.end();
+          }
         }
         else {
-          log_to_file(filePath + " doesnt exist (3).");
-          res.writeHead(500);
-          res.end('Sorry, check with the site admin for error: ' + error.code + ' ..\n');
-          res.end();
+          content = content.toString().replace( new RegExp("##MYIP##", 'g') , localIpAddress + ':' + port);
+
+          res.writeHead(200, {
+            'Content-Type': contentType,
+            'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+            'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+            'Pragma': 'no-cache',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Request-Method': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS, GET',
+            'Access-Control-Allow-Headers': '*'
+          });
+          res.end(content, 'utf-8');
+        }
+      });
+    }
+    else
+    //end classic static web server
+    //---------------------------------------
+
+    if (xpath === "/system.txt") {
+      res.writeHead(200, {
+        'Content-Type': 'text/html;charset=utf-8',
+        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Request-Method': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET',
+        'Access-Control-Allow-Headers': '*'
+      });
+
+      res.write('system check');
+      res.end();
+
+    }
+    else
+
+    // return a html page if the user accesses the server directly
+    if (xpath === "/stream.html") {
+      res.writeHead(200, {
+        'Content-Type': 'text/html;charset=utf-8',
+        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Request-Method': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET',
+        'Access-Control-Allow-Headers': '*'
+      });
+
+      res.write('<!doctype html>');
+      res.write('<html>');
+      res.write('<head><title>' + pjson.name + '</title><meta charset="utf-8" /></head>');
+      res.write('<body>');
+      res.write('<img src="video_stream.jpg" />');
+      res.write('</body>');
+      res.write('</html>');
+      res.end();
+      return;
+    }
+    else if (xpath === "/read_data") {
+      res.writeHead(200, {
+        'Content-Type': 'text/html',
+        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Request-Method': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET',
+        'Access-Control-Allow-Headers': '*'
+      });
+
+      res.end(JSON.stringify(SerialData));
+      SerialData = [];
+      return;
+    }
+
+    else if (xpath === "/save_face") {
+      var face_filename = './face/' + query.face_name + '.txt';
+      fs.writeFile(face_filename, query.highlight, function (err) {
+        if (err) {
+//      console.log(err);
+        }
+        else {
+        }
+      });
+
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Request-Method': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET',
+        'Access-Control-Allow-Headers': '*'
+      });
+      res.statusCode = 200;
+      res.end(JSON.stringify({result: "file saved"}));
+      return;
+    }
+
+    else if (xpath === "/load_faces") {
+
+      var startPath = "./face";
+      var filter = ".txt";
+
+      if (!fs.existsSync(startPath)) {
+        return;
+      }
+
+      var FileList = [];
+      var files = fs.readdirSync(startPath);
+      for (var i = 0; i < files.length; i++) {
+        var filename = path.join(startPath, files[i]);
+        var stat = fs.lstatSync(filename);
+        if (stat.isDirectory()) {
+        }
+        else if (filename.indexOf(filter) >= 0) {
+          FileList.push(files[i]);
+//          console.log('-- found: ', filename);
         }
       }
-      else {
+
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Request-Method': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET',
+        'Access-Control-Allow-Headers': '*'
+      });
+      res.statusCode = 200;
+      res.end(JSON.stringify(FileList), 'utf-8');
+      return;
+    }
+
+    else if (xpath === "/load_face") {
+
+      var face_filename = './face/' + query.face_name;
+      fs.readFile(face_filename, function (error, content) {
+
         res.writeHead(200, {
-          'Content-Type': contentType,
+          'Content-Type': 'application/json',
           'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
           'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
           'Pragma': 'no-cache',
@@ -194,146 +364,88 @@ var server = http.createServer(function (req, res) {
           'Access-Control-Allow-Methods': 'OPTIONS, GET',
           'Access-Control-Allow-Headers': '*'
         });
+        res.statusCode = 200;
         res.end(content, 'utf-8');
-      }
-    });
-  }
-  else
-  //end classic static web server
-  //---------------------------------------
+      });
+      return;
+    }
 
-  if (xpath === "/system.txt") {
-    res.writeHead(200, {
-      'Content-Type': 'text/html;charset=utf-8',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
+    else if (xpath === "/write_data") {
+      sp.flush(function (err, results) {});
+      sp.write(query.q);
 
-    res.write('system check');
-    res.end();
+      res.writeHead(200, {
+        'Content-Type': 'text/html',
+        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Request-Method': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET',
+        'Access-Control-Allow-Headers': '*'
+      });
 
-  }
-  else
+      res.end("wrote data");
+      return;
+    }
+    else if (xpath === "/health_check") {
+      res.statusCode = 200;
+      res.end();
+      return;
+    }
+    else
 
-  // return a html page if the user accesses the server directly
-  if (xpath === "/stream.html") {
-    res.writeHead(200, {
-      'Content-Type': 'text/html;charset=utf-8',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
+// for image requests, return a HTTP multipart document (stream)
+    if (xpath === "/video_stream.jpg") {
 
-    res.write('<!doctype html>');
-    res.write('<html>');
-    res.write('<head><title>' + pjson.name + '</title><meta charset="utf-8" /></head>');
-    res.write('<body>');
-    res.write('<img src="video_stream.jpg" />');
-    res.write('</body>');
-    res.write('</html>');
-    res.end();
-    return;
-  }
-  else if (xpath === "/read_data") {
-    res.writeHead(200, {
-      'Content-Type': 'text/html',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
-
-    res.end(JSON.stringify(SerialData));
-    SerialData = [];
-    return;
-  }
-  else if (xpath === "/write_data") {
-    sp.flush(function(err,results){});
-    sp.write(query.q);
-
-    res.writeHead(200, {
-      'Content-Type': 'text/html',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
-
-    res.end("wrote data");
-    return;
-  }
-  else if (xpath === "/health_check") {
-    res.statusCode = 200;
-    res.end();
-    return;
-  }
-  else
-
-  // for image requests, return a HTTP multipart document (stream)
-  if (xpath === "/video_stream.jpg") {
-
-    res.writeHead(200, {
-      'Content-Type': 'multipart/x-mixed-replace;boundary="' + boundaryID + '"',
-      'Connection': 'keep-alive',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
+      res.writeHead(200, {
+        'Content-Type': 'multipart/x-mixed-replace;boundary="' + boundaryID + '"',
+        'Connection': 'keep-alive',
+        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Request-Method': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET',
+        'Access-Control-Allow-Headers': '*'
+      });
 
 
 //
 // send new frame to client
 //
-    var subscriber_token = PubSub.subscribe('MJPEG', function (msg, data) {
+      var subscriber_token = PubSub.subscribe('MJPEG', function (msg, data) {
 
-      //console.log('sending image');
+        //console.log('sending image');
 
-      res.write('--' + boundaryID + '\r\n')
-      res.write('Content-Type: image/jpeg\r\n');
-      res.write('Content-Length: ' + data.length + '\r\n');
-      res.write("\r\n");
-      res.write(Buffer.from(data), 'binary');
-      res.write("\r\n");
-    });
+        res.write('--' + boundaryID + '\r\n')
+        res.write('Content-Type: image/jpeg\r\n');
+        res.write('Content-Length: ' + data.length + '\r\n');
+        res.write("\r\n");
+        res.write(Buffer.from(data), 'binary');
+        res.write("\r\n");
+      });
 
 //
 // connection is closed when the browser terminates the request
 //
-    res.on('close', function () {
-      log_to_file("Connection closed!");
+      res.on('close', function () {
+        log_to_file("Connection closed!");
 //      console.log("Connection closed!");
-      PubSub.unsubscribe(subscriber_token);
-      res.end();
-    });
-  }
-  else {
-    log_to_file(xpath + " doesnt exist (4).");
+        PubSub.unsubscribe(subscriber_token);
+        res.end();
+      });
+    }
+    else {
+      log_to_file(xpath + " doesnt exist (4).");
 //    console.log(xpath + " doesnt exist.");
-    fs.readFile('./404.html', function (error, content) {
-      res.writeHead(200, {'Content-Type': contentType});
-      res.end(content, 'utf-8');
-    });
-  }
-});
+      fs.readFile('./404.html', function (error, content) {
+        res.writeHead(200, {'Content-Type': contentType});
+        res.end(content, 'utf-8');
+      });
+    }
+  })
+;
 
 server.on('error', function (e) {
   if (e.code == 'EADDRINUSE') {
@@ -398,6 +510,6 @@ camera
   .timelapse(timeout) // how often we should capture an image
   .width(width)
   .height(height)
-//  .rotation(90)
+  //  .rotation(90)
   .quality(quality)
   .takePicture(tmpImage);

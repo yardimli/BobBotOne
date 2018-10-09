@@ -17,8 +17,40 @@
   <link rel="icon" type="image/png" href="/webserver/favicon.ico">
 </head>
 
-<body style=" background: lightblue; margin:0px; padding:0px;">
+<body style=" background: lightblue; margin:0px; padding:0px; overflow: hidden;">
 <canvas id="canvas" width="420px" height="420px" style="background: #fff; margin:0px"></canvas>
+
+<div class="dropdown" style="position: absolute; right:151px; top:1px;">
+  <button class="btn btn-warning dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"
+          style="background-color: black;">&nbsp;<span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="face_list">
+    <li><a href="#exampleModal" data-toggle="modal">Save Design</a></li>
+  </ul>
+</div>
+
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="exampleModalLabel">New Face</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="face-name" class="control-label">Face Name:</label>
+          <input type="text" class="form-control" id="face-name">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="save-face">Save Face</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 
 <script>
@@ -35,6 +67,85 @@
   var LastMouseCurrentY = 0;
 
   $(document).ready(function () {
+
+    var UrlToGet = "http://192.168.1.123:8080/load_faces";
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+      UrlToGet = "/load_faces";
+    }
+
+    setTimeout(function () {
+      var UrlToGet = "http://192.168.1.123:8080/load_face";
+      if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+        UrlToGet = "/load_face";
+      }
+      var data = {"face_name": "face1.txt"};
+
+      $.ajax({
+        url: UrlToGet,
+        data: data,
+        dataType: "json",
+        success: function (data, status) {
+          Highlights = data;
+          drawLED();
+          drawBoard();
+          writeMessage(canvas, "##MYIP##");
+          console.log("Status: " + status);
+        },
+        error: function (data, status) {
+          console.log("error Status: " + status);
+        }
+
+      });
+
+    },3000);
+
+    var data = {};
+
+    $.ajax({
+      url: UrlToGet,
+      data: data,
+      dataType: "json",
+      success: function (data, status) {
+        for (face in data) {
+//          console.log(data[face]);
+          $("#face_list").append('<li><a href="#" class="load_face" data-face_name="' + data[face] + '">' + data[face] + '</a></li>\n');
+        }
+
+        $(".load_face").on('click', function (e) {
+          console.log("load face");
+
+          var UrlToGet = "http://192.168.1.123:8080/load_face";
+          if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+            UrlToGet = "/load_face";
+          }
+          var data = {"face_name": $(this).data("face_name")};
+
+          $.ajax({
+            url: UrlToGet,
+            data: data,
+            dataType: "json",
+            success: function (data, status) {
+              Highlights = data;
+
+              console.log("Status: " + status);
+            },
+            error: function (data, status) {
+              console.log("error Status: " + status);
+            }
+
+          });
+
+          e.preventDefault();
+        });
+
+        console.log("Status: " + status);
+      },
+      error: function (data, status) {
+        console.log("error Status: " + status);
+      }
+
+    });
+
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -61,7 +172,9 @@
 
         drawLED();
         drawBoard();
+
 //        writeMessage(canvas, message);
+        writeMessage(canvas, "##MYIP##");
       }
     }, false);
 
@@ -170,5 +283,41 @@
       context.strokeStyle = "black";
       context.stroke();
     }
+
+    var SaveHighlights = [];
+
+    $("#save-face").on('click', function (e) {
+      console.log("save face press");
+      if ($("#face-name").val() !== "") {
+        console.log("save face");
+        SaveHighlights = Highlights.slice(0);
+
+        var UrlToGet = "http://192.168.1.123:8080/save_face";
+        if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+          UrlToGet = "/save_face";
+        }
+        var data = {"highlight": JSON.stringify(SaveHighlights), "face_name": $("#face-name").val()};
+
+        $.ajax({
+//          type:"post",
+          url: UrlToGet,
+          data: data,
+          dataType: "json",
+          success: function (data, status) {
+            console.log("Status: " + status);
+          },
+          error: function (data, status) {
+            console.log("error Status: " + status);
+          }
+
+        });
+        $("#exampleModal").modal('hide');
+      }
+      else {
+        alert("face name?");
+      }
+      e.preventDefault();
+    });
+
   });
 </script>
