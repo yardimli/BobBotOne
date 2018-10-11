@@ -156,8 +156,9 @@ var server = http.createServer(function (req, res) {
 
 
     var contentType = 'text/html';
+
     //classic web server
-    //---------------------------------------
+    //--------------------------------------------------------------------------------------------------------------
     if (xpath.indexOf("/webserver") !== -1) {
       var filePath = '.' + req.url;
 //    if (filePath === './webserver') filePath = './webserver/index.html';
@@ -209,7 +210,7 @@ var server = http.createServer(function (req, res) {
           }
         }
         else {
-          content = content.toString().replace( new RegExp("##MYIP##", 'g') , localIpAddress + ':' + port);
+          content = content.toString().replace(new RegExp("##MYIP##", 'g'), localIpAddress + ':' + port);
 
           res.writeHead(200, {
             'Content-Type': contentType,
@@ -227,8 +228,9 @@ var server = http.createServer(function (req, res) {
     }
     else
     //end classic static web server
-    //---------------------------------------
+    //--------------------------------------------------------------------------------------------------------------
 
+    //--------------------------------------------------------------------------------------------------------------
     if (xpath === "/system.txt") {
       res.writeHead(200, {
         'Content-Type': 'text/html;charset=utf-8',
@@ -247,6 +249,7 @@ var server = http.createServer(function (req, res) {
     }
     else
 
+    //--------------------------------------------------------------------------------------------------------------
     // return a html page if the user accesses the server directly
     if (xpath === "/stream.html") {
       res.writeHead(200, {
@@ -270,6 +273,8 @@ var server = http.createServer(function (req, res) {
       res.end();
       return;
     }
+
+    //--------------------------------------------------------------------------------------------------------------
     else if (xpath === "/read_data") {
       res.writeHead(200, {
         'Content-Type': 'text/html',
@@ -287,6 +292,7 @@ var server = http.createServer(function (req, res) {
       return;
     }
 
+    //--------------------------------------------------------------------------------------------------------------
     else if (xpath === "/save_face") {
       var face_filename = './face/' + query.face_name + '.txt';
       fs.writeFile(face_filename, query.highlight, function (err) {
@@ -312,6 +318,34 @@ var server = http.createServer(function (req, res) {
       return;
     }
 
+    //--------------------------------------------------------------------------------------------------------------
+    else if (xpath === "/save_face_animation") {
+      var face_filename = './face/animation_' + query.face_animation_name + '.txt';
+      fs.writeFile(face_filename, query.animation_cmd, function (err) {
+        if (err) {
+//      console.log(err);
+        }
+        else {
+        }
+      });
+
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Request-Method': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET',
+        'Access-Control-Allow-Headers': '*'
+      });
+      res.statusCode = 200;
+      res.end(JSON.stringify({result: "file saved"}));
+      return;
+    }
+
+
+    //--------------------------------------------------------------------------------------------------------------
     else if (xpath === "/load_faces") {
 
       var startPath = "./face";
@@ -328,7 +362,7 @@ var server = http.createServer(function (req, res) {
         var stat = fs.lstatSync(filename);
         if (stat.isDirectory()) {
         }
-        else if (filename.indexOf(filter) >= 0) {
+        else if ((filename.indexOf(filter) >= 0) && (filename.indexOf("animation") === -1)) {
           FileList.push(files[i]);
 //          console.log('-- found: ', filename);
         }
@@ -349,6 +383,45 @@ var server = http.createServer(function (req, res) {
       return;
     }
 
+    //--------------------------------------------------------------------------------------------------------------
+    else if (xpath === "/load_face_animations") {
+
+      var startPath = "./face";
+      var filter = ".txt";
+
+      if (!fs.existsSync(startPath)) {
+        return;
+      }
+
+      var FileList = [];
+      var files = fs.readdirSync(startPath);
+      for (var i = 0; i < files.length; i++) {
+        var filename = path.join(startPath, files[i]);
+        var stat = fs.lstatSync(filename);
+        if (stat.isDirectory()) {
+        }
+        else if ((filename.indexOf(filter) >= 0) && (filename.indexOf("animation") >= 0)) {
+          FileList.push(files[i]);
+//          console.log('-- found: ', filename);
+        }
+      }
+
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Request-Method': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET',
+        'Access-Control-Allow-Headers': '*'
+      });
+      res.statusCode = 200;
+      res.end(JSON.stringify(FileList), 'utf-8');
+      return;
+    }
+
+    //--------------------------------------------------------------------------------------------------------------
     else if (xpath === "/load_face") {
 
       var face_filename = './face/' + query.face_name;
@@ -370,6 +443,30 @@ var server = http.createServer(function (req, res) {
       return;
     }
 
+
+    //--------------------------------------------------------------------------------------------------------------
+    else if (xpath === "/load_face_animation") {
+
+      var face_filename = './face/' + query.face_animation_name;
+      fs.readFile(face_filename, function (error, content) {
+
+        res.writeHead(200, {
+          'Content-Type': 'application/json',
+          'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+          'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+          'Pragma': 'no-cache',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Request-Method': '*',
+          'Access-Control-Allow-Methods': 'OPTIONS, GET',
+          'Access-Control-Allow-Headers': '*'
+        });
+        res.statusCode = 200;
+        res.end(content, 'utf-8');
+      });
+      return;
+    }
+
+    //--------------------------------------------------------------------------------------------------------------
     else if (xpath === "/write_data") {
       sp.flush(function (err, results) {});
       sp.write(query.q);
@@ -395,7 +492,8 @@ var server = http.createServer(function (req, res) {
     }
     else
 
-// for image requests, return a HTTP multipart document (stream)
+    //--------------------------------------------------------------------------------------------------------------
+    // for image requests, return a HTTP multipart document (stream)
     if (xpath === "/video_stream.jpg") {
 
       res.writeHead(200, {
@@ -411,9 +509,8 @@ var server = http.createServer(function (req, res) {
       });
 
 
-//
-// send new frame to client
-//
+      //--------------------------------------------------------------------------------------------------------------
+      // send new frame to client
       var subscriber_token = PubSub.subscribe('MJPEG', function (msg, data) {
 
         //console.log('sending image');
@@ -426,9 +523,8 @@ var server = http.createServer(function (req, res) {
         res.write("\r\n");
       });
 
-//
-// connection is closed when the browser terminates the request
-//
+      //--------------------------------------------------------------------------------------------------------------
+      // connection is closed when the browser terminates the request
       res.on('close', function () {
         log_to_file("Connection closed!");
 //      console.log("Connection closed!");
@@ -447,6 +543,7 @@ var server = http.createServer(function (req, res) {
   })
 ;
 
+//--------------------------------------------------------------------------------------------------------------
 server.on('error', function (e) {
   if (e.code == 'EADDRINUSE') {
     console.log('http port already in use');
@@ -463,6 +560,8 @@ server.on('error', function (e) {
   process.exit(1);
 });
 
+
+//--------------------------------------------------------------------------------------------------------------
 // start the server
 server.listen(port);
 console.log(pjson.name + " started on port " + port);
@@ -472,6 +571,8 @@ console.log('');
 
 var tmpFile = path.resolve(path.join(tmpFolder, tmpImage));
 
+
+//--------------------------------------------------------------------------------------------------------------
 // start watching the temp image for changes
 var watcher = chokidar.watch(tmpFile, {
   persistent: true,
@@ -479,6 +580,8 @@ var watcher = chokidar.watch(tmpFile, {
   interval: 10,
 });
 
+
+//--------------------------------------------------------------------------------------------------------------
 // hook file change events and send the modified image to the browser
 watcher.on('change', function (file) {
 
@@ -498,7 +601,9 @@ watcher.on('change', function (file) {
   });
 });
 
-// setup the camera 
+
+//--------------------------------------------------------------------------------------------------------------
+// setup the camera
 var camera = new PiCamera();
 
 // start image capture

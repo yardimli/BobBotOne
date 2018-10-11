@@ -25,6 +25,7 @@
           style="background-color: black;">&nbsp;<span class="caret"></span>
   </button>
   <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="face_list">
+    <li><a href="#AnimationModal" data-toggle="modal">Face Animations</a></li>
     <li><a href="#exampleModal" data-toggle="modal">Save Design</a></li>
   </ul>
 </div>
@@ -39,13 +40,53 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label for="face-name" class="control-label">Face Name:</label>
-          <input type="text" class="form-control" id="face-name">
+          <label for="face_name" class="control-label">Face Name:</label>
+          <input type="text" class="form-control" id="face_name">
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="save-face">Save Face</button>
+        <button type="button" class="btn btn-primary" id="save_face">Save Face</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="AnimationModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="AnimationModalLabel">New Face Animation</h4>
+      </div>
+      <div class="modal-body">
+
+        <div class="form-group">
+          <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" id="AnimationMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"
+                    style=""> Animations&nbsp;<span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="AnimationMenu" id="face_animation_list">
+            </ul>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="face_animation_name" class="control-label">Face Animation Name:</label>
+          <input type="text" class="form-control" id="face_animation_name">
+        </div>
+
+        <div class="form-group">
+          <label for="animation_cmd" class="control-label">Face Animation:</label>
+          <textarea class="form-control" id="animation_cmd"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-default" id="play_face_animation">Play Animation</button>
+        <button type="button" class="btn btn-primary" id="save_face_animation">Save Animation</button>
       </div>
     </div>
   </div>
@@ -65,39 +106,197 @@
   var MouseCurrentY = 0;
   var LastMouseCurrentX = 0;
   var LastMouseCurrentY = 0;
+  var SaveHighlights = [];
 
+  var PlayAnimationSeq = [];
+  var PlayAnimationRow = 0;
+  var PlayAnimation = false;
+  var PlayAnimationIntCounter = 0;
+
+
+  //---------------------------------------------------------------------------------------------------------------------------
+  function LoadFaceFile(face_name) {
+    var UrlToGet = "http://192.168.1.123:8080/load_face";
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+      UrlToGet = "/load_face";
+    }
+    var data = {"face_name": face_name};
+
+    $.ajax({
+      url: UrlToGet,
+      data: data,
+      dataType: "json",
+      success: function (data, status) {
+        Highlights = data;
+        drawLED();
+        drawBoard();
+        writeMessage(canvas, "##MYIP##");
+
+        console.log("Status: " + status);
+      },
+      error: function (data, status) {
+        console.log("error Status: " + status);
+      }
+
+    });
+  }
+
+
+  //---------------------------------------------------------------------------------------------------------------------------
+  function drawLED() {
+    var grd;
+
+    for (var y = 0; y <= bh; y += 40) {
+      for (var x = 0; x <= bw; x += 40) {
+        grd = context.createLinearGradient(0.5 + x, 0.5 + y, 0.5 + x + 40, 0.5 + y + 40);
+
+        if ((y / 40) === MouseCurrentY && (x / 40) === MouseCurrentX) {
+          grd.addColorStop(0, "red");
+          grd.addColorStop(1, "#333");
+        }
+        else {
+          grd.addColorStop(0, "#000");
+          grd.addColorStop(1, "#333");
+        }
+
+        context.fillStyle = grd;
+        context.fillRect(0.5 + x, 0.5 + y, 40, 40);
+      }
+    }
+
+//    console.log(Highlights.length);
+    for (var i = 0; i < Highlights.length; i++) {
+
+      grd = context.createLinearGradient(
+        0.5 + (Highlights[i].X * 40),
+        0.5 + (Highlights[i].Y * 40),
+        0.5 + 40 + (Highlights[i].X * 40),
+        0.5 + 40 + (Highlights[i].Y * 40));
+      grd.addColorStop(0, "yellow");
+      grd.addColorStop(1, "#333");
+
+      context.fillStyle = grd;
+      context.fillRect(
+        0.5 + (Highlights[i].X * 40),
+        0.5 + (Highlights[i].Y * 40),
+        40,
+        40);
+    }
+  }
+
+
+  //---------------------------------------------------------------------------------------------------------------------------
+  function drawBoard() {
+
+    for (var x = 0; x <= bw; x += 40) {
+      context.moveTo(0.5 + x + p, p);
+      context.lineTo(0.5 + x + p, bh + p);
+    }
+
+
+    for (var x = 0; x <= bh; x += 40) {
+      context.moveTo(p, 0.5 + x + p);
+      context.lineTo(bw + p, 0.5 + x + p);
+    }
+
+    context.strokeStyle = "black";
+    context.stroke();
+  }
+
+  //---------------------------------------------------------------------------------------------------------------------------
+  function writeMessage(canvas, message) {
+    context.font = '12pt Calibri';
+    context.fillStyle = 'white';
+    context.fillText(message, 10, 25);
+  }
+
+  //---------------------------------------------------------------------------------------------------------------------------
+  function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
+    };
+  }
+
+
+  //---------------------------------------------------------------------------------------------------------------------------
   $(document).ready(function () {
 
+    //---------------------------------------------------------------------------------------------------------------------------
+    setTimeout(function () {
+      LoadFaceFile("face1.txt");
+
+      PlayAnimationSeq = [];
+      PlayAnimationSeq.push({"FileName": "face1", "Delay": 10});
+      PlayAnimationSeq.push({"FileName": "face2", "Delay": 10});
+      PlayAnimationRow = -1;
+      PlayAnimationIntCounter = 0;
+      PlayAnimation = true;
+    }, 2000);
+
+
+    setInterval(function () {
+      if (PlayAnimation && PlayAnimationSeq.length > 0) {
+        PlayAnimationIntCounter++;
+
+        if (PlayAnimationRow == -1) {
+          PlayAnimationRow = 1;
+          PlayAnimationIntCounter = 0;
+        }
+
+        if (PlayAnimationIntCounter > PlayAnimationSeq[PlayAnimationRow - 1]["Delay"]) {
+
+          PlayAnimationRow++;
+          if (PlayAnimationRow > PlayAnimationSeq.length) {
+            PlayAnimationRow = 1;
+          }
+
+          LoadFaceFile(PlayAnimationSeq[PlayAnimationRow - 1]["FileName"] + ".txt");
+          PlayAnimationIntCounter = 0;
+        }
+      }
+    }, 100);
+
+
+    //---------------------------------------------------------------------------------------------------------------------------
     var UrlToGet = "http://192.168.1.123:8080/load_faces";
     if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
       UrlToGet = "/load_faces";
     }
 
-    setTimeout(function () {
-      var UrlToGet = "http://192.168.1.123:8080/load_face";
-      if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-        UrlToGet = "/load_face";
-      }
-      var data = {"face_name": "face1.txt"};
+    var data = {};
 
-      $.ajax({
-        url: UrlToGet,
-        data: data,
-        dataType: "json",
-        success: function (data, status) {
-          Highlights = data;
-          drawLED();
-          drawBoard();
-          writeMessage(canvas, "##MYIP##");
-          console.log("Status: " + status);
-        },
-        error: function (data, status) {
-          console.log("error Status: " + status);
+    $.ajax({
+      url: UrlToGet,
+      data: data,
+      dataType: "json",
+      success: function (data, status) {
+        for (face in data) {
+          $("#face_list").append('<li><a href="#" class="load_face" data-face_name="' + data[face] + '">' + data[face] + '</a></li>\n');
         }
 
-      });
+        //---------------------------------------------------------------------------------------------------------------------------
+        $(".load_face").on('click', function (e) {
+          console.log("load face");
+          LoadFaceFile($(this).data("face_name"));
+          e.preventDefault();
+        });
 
-    },3000);
+        console.log("Status: " + status);
+      },
+      error: function (data, status) {
+        console.log("error Status: " + status);
+      }
+
+    });
+
+
+    //---------------------------------------------------------------------------------------------------------------------------
+    var UrlToGet = "http://192.168.1.123:8080/load_face_animations";
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+      UrlToGet = "/load_face_animations";
+    }
 
     var data = {};
 
@@ -108,24 +307,29 @@
       success: function (data, status) {
         for (face in data) {
 //          console.log(data[face]);
-          $("#face_list").append('<li><a href="#" class="load_face" data-face_name="' + data[face] + '">' + data[face] + '</a></li>\n');
+          $("#face_animation_list").append('<li><a href="#" class="load_face_animation" data-face_animation_name="' + data[face] + '">' + data[face] + '</a></li>\n');
         }
 
-        $(".load_face").on('click', function (e) {
-          console.log("load face");
+        //---------------------------------------------------------------------------------------------------------------------------
+        $(".load_face_animation").on('click', function (e) {
+          console.log("load face animation");
+          var animation_short_name = $(this).data("face_animation_name");
+          animation_short_name = animation_short_name.replace(".txt", "");
+          animation_short_name = animation_short_name.replace("animation_", "");
+          $("#face_animation_name").val(animation_short_name);
 
-          var UrlToGet = "http://192.168.1.123:8080/load_face";
+          var UrlToGet = "http://192.168.1.123:8080/load_face_animation";
           if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-            UrlToGet = "/load_face";
+            UrlToGet = "/load_face_animation";
           }
-          var data = {"face_name": $(this).data("face_name")};
+          var data = {"face_animation_name": $(this).data("face_animation_name")};
 
           $.ajax({
             url: UrlToGet,
             data: data,
-            dataType: "json",
+            dataType: "text",
             success: function (data, status) {
-              Highlights = data;
+              $("#animation_cmd").val(data);
 
               console.log("Status: " + status);
             },
@@ -147,8 +351,107 @@
     });
 
 
+    //---------------------------------------------------------------------------------------------------------------------------
+    $("#play_face_animation").on('click', function (e) {
+
+      PlayAnimationSeq = [];
+
+      var TempList = $("#animation_cmd").val();
+
+      TempList = TempList.replace(/\r\n/g, "\r").replace(/\n/g, "\r").split(/\r/);
+
+      console.log(TempList);
+
+      for (var i = 0; i < TempList.length; i++) {
+        var TempRow = TempList[i].split(";");
+        if (TempRow.length == 2) {
+          PlayAnimationSeq.push({"FileName": TempRow[0].trim(), "Delay": TempRow[1].trim()});
+        }
+      }
+      console.log(PlayAnimationSeq);
+
+      PlayAnimationRow = -1;
+      PlayAnimationIntCounter = 0;
+      PlayAnimation = true;
+
+      $("#AnimationModal").modal('hide');
+    });
+
+    //---------------------------------------------------------------------------------------------------------------------------
+    $("#save_face_animation").on('click', function (e) {
+      console.log("save face press");
+      if ($("#face_animation_name").val() !== "") {
+        console.log("save face animation");
+
+        var UrlToGet = "http://192.168.1.123:8080/save_face_animation";
+        if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+          UrlToGet = "/save_face_animation";
+        }
+        var data = {"animation_cmd": $("#animation_cmd").val(), "face_animation_name": $("#face_animation_name").val()};
+
+        $.ajax({
+//          type:"post",
+          url: UrlToGet,
+          data: data,
+          dataType: "json",
+          success: function (data, status) {
+            console.log("Status: " + status);
+          },
+          error: function (data, status) {
+            console.log("error Status: " + status);
+          }
+
+        });
+//        $("#AnimationModal").modal('hide');
+      }
+      else {
+        alert("face animation name?");
+      }
+      e.preventDefault();
+    });
+
+
+    //---------------------------------------------------------------------------------------------------------------------------
+    $("#save_face").on('click', function (e) {
+      console.log("save face press");
+      if ($("#face_name").val() !== "") {
+        console.log("save face");
+        SaveHighlights = Highlights.slice(0);
+
+        var UrlToGet = "http://192.168.1.123:8080/save_face";
+        if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+          UrlToGet = "/save_face";
+        }
+        var data = {"highlight": JSON.stringify(SaveHighlights), "face_name": $("#face_name").val()};
+
+        $.ajax({
+//          type:"post",
+          url: UrlToGet,
+          data: data,
+          dataType: "json",
+          success: function (data, status) {
+            console.log("Status: " + status);
+          },
+          error: function (data, status) {
+            console.log("error Status: " + status);
+          }
+        });
+        $("#exampleModal").modal('hide');
+      }
+      else {
+        alert("face name?");
+      }
+      e.preventDefault();
+    });
+
+
+    //---------------------------------------------------------------------------------------------------------------------------
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    bw = window.innerWidth;
+    bh = window.innerHeight;
+    drawLED();
+    drawBoard();
 
     setTimeout(function () {
       canvas.width = window.innerWidth;
@@ -182,6 +485,7 @@
     canvas.addEventListener('click', function (event) {
 //	console.log("click");
 
+      PlayAnimation = false;
       var DeleteDot = false;
       for (var i = 0; i < Highlights.length; i++) {
         if (Highlights[i].X == MouseCurrentX && Highlights[i].Y == MouseCurrentY) {
@@ -202,122 +506,6 @@
 //  console.log(Highlights);
     }, false);
 
-
-    function writeMessage(canvas, message) {
-//  var context = canvas.getContext('2d');
-//  context.clearRect(0, 0, canvas.width, canvas.height);
-      context.font = '12pt Calibri';
-      context.fillStyle = 'white';
-      context.fillText(message, 10, 25);
-    }
-
-    function getMousePos(canvas, evt) {
-      var rect = canvas.getBoundingClientRect();
-      return {
-        x: evt.clientX - rect.left,
-        y: evt.clientY - rect.top
-      };
-    }
-
-    function drawLED() {
-      var grd;
-
-      for (var y = 0; y <= bh; y += 40) {
-        for (var x = 0; x <= bw; x += 40) {
-          grd = context.createLinearGradient(0.5 + x, 0.5 + y, 0.5 + x + 40, 0.5 + y + 40);
-
-          if ((y / 40) === MouseCurrentY && (x / 40) === MouseCurrentX) {
-            grd.addColorStop(0, "red");
-            grd.addColorStop(1, "#333");
-          }
-          else {
-            grd.addColorStop(0, "#000");
-            grd.addColorStop(1, "#333");
-          }
-
-          context.fillStyle = grd;
-          context.fillRect(0.5 + x, 0.5 + y, 40, 40);
-        }
-      }
-
-//    console.log(Highlights.length);
-      for (var i = 0; i < Highlights.length; i++) {
-
-        grd = context.createLinearGradient(
-          0.5 + (Highlights[i].X * 40),
-          0.5 + (Highlights[i].Y * 40),
-          0.5 + 40 + (Highlights[i].X * 40),
-          0.5 + 40 + (Highlights[i].Y * 40));
-        grd.addColorStop(0, "yellow");
-        grd.addColorStop(1, "#333");
-
-        context.fillStyle = grd;
-        context.fillRect(
-          0.5 + (Highlights[i].X * 40),
-          0.5 + (Highlights[i].Y * 40),
-          40,
-          40);
-
-//   if ( array[i] === 5) {
-//     arr.splice(i, 1);
-//   }
-      }
-
-
-    }
-
-
-    function drawBoard() {
-
-      for (var x = 0; x <= bw; x += 40) {
-        context.moveTo(0.5 + x + p, p);
-        context.lineTo(0.5 + x + p, bh + p);
-      }
-
-
-      for (var x = 0; x <= bh; x += 40) {
-        context.moveTo(p, 0.5 + x + p);
-        context.lineTo(bw + p, 0.5 + x + p);
-      }
-
-      context.strokeStyle = "black";
-      context.stroke();
-    }
-
-    var SaveHighlights = [];
-
-    $("#save-face").on('click', function (e) {
-      console.log("save face press");
-      if ($("#face-name").val() !== "") {
-        console.log("save face");
-        SaveHighlights = Highlights.slice(0);
-
-        var UrlToGet = "http://192.168.1.123:8080/save_face";
-        if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-          UrlToGet = "/save_face";
-        }
-        var data = {"highlight": JSON.stringify(SaveHighlights), "face_name": $("#face-name").val()};
-
-        $.ajax({
-//          type:"post",
-          url: UrlToGet,
-          data: data,
-          dataType: "json",
-          success: function (data, status) {
-            console.log("Status: " + status);
-          },
-          error: function (data, status) {
-            console.log("error Status: " + status);
-          }
-
-        });
-        $("#exampleModal").modal('hide');
-      }
-      else {
-        alert("face name?");
-      }
-      e.preventDefault();
-    });
 
   });
 </script>
