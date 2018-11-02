@@ -7,7 +7,13 @@
 #include "DFRobot_VL53L0X.h"
 //#include "DFRobot_LCD.h"
 
-DFRobotVL53L0X sensor;
+#include "Adafruit_PWMServoDriver.h"
+#define SERVOMIN  200 // this is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX  500 // this is the 'maximum' pulse length count (out of 4096)
+uint8_t servonum = 0;
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
+//DFRobotVL53L0X sensor;
 //DFRobot_LCD lcd(16,2);
 
 //Servo TOFServo;
@@ -79,10 +85,10 @@ int LastRightBumper  = 0;
 int LastLeftHeight   = 0;
 int LastRightHeight  = 0;
 
-int Read_Distance_Delay = 0;
-float Last_Distance = 0;
-float Current_Distance = 0;
-float Temp_Distance = 0;
+//int Read_Distance_Delay = 0;
+//float Last_Distance = 0;
+//float Current_Distance = 0;
+//float Temp_Distance = 0;
 
 //String LCDMsg = "";
 
@@ -184,11 +190,31 @@ void setup(void)
   //join i2c bus (address optional for master)
   Wire.begin();
   //Set I2C sub-device address
-  sensor.begin(0x50);
+  //sensor.begin(0x50);
   //Set to Back-to-back mode and high precision mode
-  sensor.setMode(Continuous, High);
+  //sensor.setMode(Continuous, High);
   //Laser rangefinder begins to work
-  sensor.start();
+  //sensor.start();
+
+  pwm.begin();
+  pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
+
+	delay(100);
+
+  Serial.println(servonum);
+  for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++) {
+    pwm.setPWM(servonum, 0, pulselen);
+    delay(20);
+  }
+
+  delay(500);
+  for (uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--) {
+    pwm.setPWM(servonum, 0, pulselen);
+    delay(20);
+  }
+
+  delay(500);
+
 
 //  lcd.init();
 //  lcd.print("hello world");
@@ -342,14 +368,14 @@ void loop(void)
   LeftHeight = digitalRead(LeftFloorPin);
   RightHeight = digitalRead(RightFloorPin);
 
-	Read_Distance_Delay++;
-	if (Read_Distance_Delay>5) {
-		Temp_Distance = sensor.getDistance();
-		if (Temp_Distance>120) {
-		  Current_Distance = Temp_Distance;
-		}
-	  Read_Distance_Delay = 0;
-	}
+//	Read_Distance_Delay++;
+//	if (Read_Distance_Delay>5) {
+//		Temp_Distance = sensor.getDistance();
+//		if (Temp_Distance>120) {
+//		  Current_Distance = Temp_Distance;
+//		}
+//	  Read_Distance_Delay = 0;
+//	}
 
   kk++;
   if (kk>10) {
@@ -363,8 +389,8 @@ void loop(void)
     if ( (LastLeftBumper != LeftBumper) ||
          (LastRightBumper != RightBumper) ||
          (LastLeftHeight != LeftHeight) ||
-         (LastRightHeight != RightHeight) ||
-         (Last_Distance != Current_Distance) )
+         (LastRightHeight != RightHeight) ) //||
+//         (Last_Distance != Current_Distance) )
     {
       Serial.print("{\"op\":\"sd\", \"c\":");
       Serial.print(mm);
@@ -383,9 +409,9 @@ void loop(void)
       Serial.print("\"rh\":");
       Serial.print(RightHeight);
 
-			Serial.print(", ");
-			Serial.print("\"d\":");
-			Serial.print(Current_Distance);
+//			Serial.print(", ");
+//			Serial.print("\"d\":");
+//			Serial.print(Current_Distance);
 
       Serial.println("}");
 
@@ -393,7 +419,7 @@ void loop(void)
 	    LastRightBumper  = RightBumper;
 	    LastLeftHeight   = LeftHeight;
 	    LastRightHeight  = RightHeight;
-	    Last_Distance = Current_Distance;
+//	    Last_Distance = Current_Distance;
     }
   }
 
@@ -403,7 +429,7 @@ void loop(void)
 //  if (RightHeight == LOW) { LCDMsg = "Right H"; }
 
 
-  if (LeftBumper == LOW || RightBumper == LOW || LeftHeight == LOW || RightHeight == LOW || ( Current_Distance<850 && Current_Distance>120)) {
+  if (LeftBumper == LOW || RightBumper == LOW || LeftHeight == LOW || RightHeight == LOW  ) { // || ( Current_Distance<850 && Current_Distance>120)) {
     RepeatTurnLCounter=0;
     RepeatTurnRCounter=0;
 
@@ -541,9 +567,9 @@ void loop(void)
     } else
 
     if (strcmp(messageFromPC, "Current_Distance") == 0) {
-        Serial.print("{op:'distance', value:");
-        Serial.print(sensor.getDistance());
-        Serial.println("}");
+//        Serial.print("{op:'distance', value:");
+//        Serial.print(sensor.getDistance());
+//        Serial.println("}");
     } else
 
     if (strcmp(messageFromPC, "Sweep_Servos") == 0) {
@@ -642,5 +668,21 @@ void turn_R(char a, char b)            //Turn Right
   digitalWrite(M1, LOW);
   analogWrite (E2, b);
   digitalWrite(M2, HIGH);
+}
+
+// you can use this function if you'd like to set the pulse length in seconds
+// e.g. setServoPulse(0, 0.001) is a ~1 millisecond pulse width. its not precise!
+void setServoPulse(uint8_t n, double pulse) {
+  double pulselength;
+
+  pulselength = 1000000;   // 1,000,000 us per second
+  pulselength /= 60;   // 60 Hz
+  Serial.print(pulselength); Serial.println(" us per period");
+  pulselength /= 4096;  // 12 bits of resolution
+  Serial.print(pulselength); Serial.println(" us per bit");
+  pulse *= 1000000;  // convert to us
+  pulse /= pulselength;
+  Serial.println(pulse);
+  pwm.setPWM(n, 0, pulse);
 }
 
