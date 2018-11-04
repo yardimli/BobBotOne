@@ -1,7 +1,6 @@
 //Standard PWM DC control
-//v21
+//v27
 
-#include <Servo.h>
 #include "Arduino.h"
 #include "Wire.h"
 #include "DFRobot_VL53L0X.h"
@@ -10,18 +9,14 @@
 #include "Adafruit_PWMServoDriver.h"
 #define SERVOMIN  200 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  500 // this is the 'maximum' pulse length count (out of 4096)
-uint8_t servonum = 0;
+uint8_t Camera_Servo_Num = 0;
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 //DFRobotVL53L0X sensor;
 //DFRobot_LCD lcd(16,2);
 
-//Servo TOFServo;
-Servo CameraServo;
-
-
-int RightBumperPin = A2;
-int LeftBumperPin = A3;
+//int RightBumperPin = A2;
+//int LeftBumperPin = A3;
 int RightFloorPin = A4;
 int LeftFloorPin = A5;
 
@@ -31,6 +26,12 @@ int CameraNextMove = 0;
 int CameraGoTo = 90;
 int CameraPin = 10;
 
+
+///For previous Romeo, please use these pins.
+//int E1 = 6;     //M1 Speed Control
+//int E2 = 9;     //M2 Speed Control
+//int M1 = 7;    //M1 Direction Control
+//int M2 = 8;    //M1 Direction Control
 
 int E1 = 5;     //M1 Speed Control
 int E2 = 6;     //M2 Speed Control
@@ -42,8 +43,8 @@ int mm = 0;
 
 int StopAfterN = 0;
 
-int LeftBumper = 0;
-int RightBumper = 0;
+//int LeftBumper = 0;
+//int RightBumper = 0;
 
 int LeftHeight = 0;
 int RightHeight = 0;
@@ -52,19 +53,6 @@ bool FirstHeight = true;
 int FirstHeightCounter = 0;
 
 int AutoDrive = false;
-
-///For previous Romeo, please use these pins.
-//int E1 = 6;     //M1 Speed Control
-//int E2 = 9;     //M2 Speed Control
-//int M1 = 7;    //M1 Direction Control
-//int M2 = 8;    //M1 Direction Control
-
-//int TOFPos = 0;
-//int TOFMoving = false;
-//int TOFNextMove = 0;
-//int TOFGoTo = 90;
-//int TOFPin = 9;
-//int TOFScanDirection = 1;
 
 //int ScanDegrees[190];
 //int ScanZones[18];
@@ -77,11 +65,9 @@ int AutoDrive = false;
 //int LifeCounter = 0;
 //int LifeCounterX = 0;
 
-//bool StartTOFScan = false;
+//int LastLeftBumper   = 0;
+//int LastRightBumper  = 0;
 
-
-int LastLeftBumper   = 0;
-int LastRightBumper  = 0;
 int LastLeftHeight   = 0;
 int LastRightHeight  = 0;
 
@@ -91,11 +77,6 @@ int LastRightHeight  = 0;
 //float Temp_Distance = 0;
 
 //String LCDMsg = "";
-
-int RepeatTurnLCounter = 0;
-int RepeatTurnLCounterSpeed = 0;
-int RepeatTurnRCounter = 0;
-int RepeatTurnRCounterSpeed = 0;
 
 //===========================================================================================
 const byte buffSize = 128;
@@ -111,7 +92,6 @@ char StringMessage[buffSize] = {0};
 int FirstInt = 0;
 int SecondInt = 0;
 
-float servoFraction = 0.0; // fraction of servo range to move
 unsigned long curMillis;
 
 
@@ -164,8 +144,6 @@ void parseData() {
 
   strtokIndx = strtok(NULL, ",");
   strcpy(StringMessage, strtokIndx); // copy it to messageFromPC
-
-//  servoFraction = atof(strtokIndx);     // convert this part to a float
 }
 
 
@@ -177,11 +155,8 @@ void setup(void)
   Serial.begin(115200);      //Set Baud Rate
   Serial.println("{op:'start':mes:'Hello World'}");
 
-//  TOFServo.attach(TOFPin);
-  CameraServo.attach(CameraPin);
-
-  pinMode(RightBumperPin, INPUT); //Right Bumper
-  pinMode(LeftBumperPin, INPUT); //Left Bumper
+//  pinMode(RightBumperPin, INPUT); //Right Bumper
+//  pinMode(LeftBumperPin, INPUT); //Left Bumper
 
   pinMode(RightFloorPin, INPUT); //Right Height Sensor
   pinMode(LeftFloorPin, INPUT); //Left Height Sensor
@@ -201,15 +176,15 @@ void setup(void)
 
 	delay(100);
 
-  Serial.println(servonum);
+	Camera_Servo_Num = 0;
   for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++) {
-    pwm.setPWM(servonum, 0, pulselen);
+    pwm.setPWM(Camera_Servo_Num, 0, pulselen);
     delay(20);
   }
 
   delay(500);
   for (uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--) {
-    pwm.setPWM(servonum, 0, pulselen);
+    pwm.setPWM(Camera_Servo_Num, 0, pulselen);
     delay(20);
   }
 
@@ -255,115 +230,26 @@ void loop(void)
 //    }
 //  }
 
-//  if (StartTOFScan) {
-//    //move scanner, find angle of longest free space
-//    if (!TOFMoving) {
-//      ScanDegrees[TOFPos] = sensor.getDistance();
-//
-////      Serial.print(TOFPos);
-////      Serial.print("deg. distance: ");
-////      Serial.println(ScanDegrees[TOFPos]);
-//
-//      if (TOFScanDirection==1) { TOFGoTo = TOFGoTo + 5; }
-//      if (TOFScanDirection==2) { TOFGoTo = TOFGoTo - 5; }
-//      if (TOFGoTo>=170 || TOFGoTo<=10) {
-//        Serial.print("{op:'scan_result',");
-//
-//	      Serial.print("dir:");
-//	      Serial.print(TOFScanDirection);
-//	      Serial.print(", scans: { ");
-//
-//
-//        for (int scount = 1; scount <= 17; scount++) {
-//          LoopStart = (scount*10)+1;
-//          LoopEnd = LoopStart+10;
-//
-//          ScanZoneTotal = 0;
-//          for (int scount2 = LoopStart; scount2 < LoopEnd; scount2++) ScanZoneTotal += ScanDegrees[scount2];
-//
-//          int ScanZoneAvg = ScanZoneTotal/2;
-//
-//          ScanZones[scount]=ScanZoneAvg;
-//
-//		      Serial.print("{ start:");
-//		      Serial.print(LoopStart);
-//		      Serial.print(", ");
-//
-//		      Serial.print("end:");
-//		      Serial.print(LoopEnd-1);
-//		      Serial.print(", ");
-//
-//		      Serial.print("avg_dist:");
-//		      Serial.print(ScanZoneAvg);
-//		      Serial.print("} , ");
-//        }
-//
-//        Serial.println("} }");
-//        if (TOFGoTo>=170) {
-//          TOFGoTo=170;
-//          TOFScanDirection=2;
-//        }
-//
-//        if (TOFGoTo<=10) {
-//          TOFGoTo = 10;
-//          TOFScanDirection=1;
-//        }
-//
-//        for (int scount2 =  0; scount2 < 180; scount2++) ScanDegrees[scount2] = 0;
-//      }
-//    }
-//  }
-
-
   if (CameraPos!= CameraGoTo) {
     CameraMoving = true;
-
-    if (!CameraServo.attached() ) { CameraServo.attach(CameraPin); }
-
-    if (CameraServo.attached() ) {
 
       CameraNextMove--;
       if (CameraNextMove<=0) {
         if (CameraPos < CameraGoTo) { CameraPos++; }
         if (CameraPos > CameraGoTo) { CameraPos--; }
-        
-        CameraServo.write(CameraPos);
+
+        if (CameraPos>SERVOMAX) { CameraPos = SERVOMAX; CameraGoTo=CameraPos; }
+        if (CameraPos<SERVOMIN) { CameraPos = SERVOMIN; CameraGoTo=CameraPos; }
+
+	      pwm.setPWM(Camera_Servo_Num, 0, CameraPos);
         CameraNextMove = 5;
       }
-    }
-    
-//    if (CameraPos == CameraGoTo && CameraServo.attached() ) { CameraServo.detach(); }
     if (CameraPos == CameraGoTo) { CameraMoving = false; }
   }
 
 
-//  if (TOFPos!= TOFGoTo) {
-//    TOFMoving = true;
-//    if (!TOFServo.attached() ) { TOFServo.attach(TOFPin); }
-//
-//    if (TOFServo.attached() ) {
-//
-//      TOFNextMove--;
-//      if (TOFNextMove<=0) {
-//        if (TOFPos < TOFGoTo) { TOFPos++; }
-//        if (TOFPos > TOFGoTo) { TOFPos--; }
-////        Serial.print("Move TOF to :");
-////        Serial.println(TOFPos);
-//
-//        TOFServo.write(TOFPos);
-//        TOFNextMove = 5;
-//      }
-//    }
-//
-////    if (TOFPos == TOFGoTo && TOFServo.attached() ) { TOFServo.detach(); }
-//    if (TOFPos == TOFGoTo) { TOFMoving = false; }
-//  }
-
-
-
-
-  LeftBumper = digitalRead(LeftBumperPin);
-  RightBumper = digitalRead(RightBumperPin);
+//  LeftBumper = digitalRead(LeftBumperPin);
+//  RightBumper = digitalRead(RightBumperPin);
 
   LeftHeight = digitalRead(LeftFloorPin);
   RightHeight = digitalRead(RightFloorPin);
@@ -386,23 +272,23 @@ void loop(void)
     }
 
 
-    if ( (LastLeftBumper != LeftBumper) ||
-         (LastRightBumper != RightBumper) ||
+    if ( /*(LastLeftBumper != LeftBumper) ||
+           (LastRightBumper != RightBumper) ||
+           (Last_Distance != Current_Distance) || */
          (LastLeftHeight != LeftHeight) ||
-         (LastRightHeight != RightHeight) ) //||
-//         (Last_Distance != Current_Distance) )
+         (LastRightHeight != RightHeight) )
     {
       Serial.print("{\"op\":\"sd\", \"c\":");
       Serial.print(mm);
       Serial.print(", ");
-    
-      Serial.print("\"lb\":");
-      Serial.print(LeftBumper);
-      Serial.print(", ");
-      Serial.print("\"rb\":");
-      Serial.print(RightBumper);
-      Serial.print(", ");
-    
+
+//      Serial.print("\"lb\":");
+//      Serial.print(LeftBumper);
+//      Serial.print(", ");
+//      Serial.print("\"rb\":");
+//      Serial.print(RightBumper);
+//      Serial.print(", ");
+
       Serial.print("\"lh\":");
       Serial.print(LeftHeight);
       Serial.print(", ");
@@ -415,8 +301,8 @@ void loop(void)
 
       Serial.println("}");
 
-	    LastLeftBumper   = LeftBumper;
-	    LastRightBumper  = RightBumper;
+//	    LastLeftBumper   = LeftBumper;
+//	    LastRightBumper  = RightBumper;
 	    LastLeftHeight   = LeftHeight;
 	    LastRightHeight  = RightHeight;
 //	    Last_Distance = Current_Distance;
@@ -429,30 +315,10 @@ void loop(void)
 //  if (RightHeight == LOW) { LCDMsg = "Right H"; }
 
 
-  if (LeftBumper == LOW || RightBumper == LOW || LeftHeight == LOW || RightHeight == LOW  ) { // || ( Current_Distance<850 && Current_Distance>120)) {
-    RepeatTurnLCounter=0;
-    RepeatTurnRCounter=0;
-
+  if (LeftHeight == LOW || RightHeight == LOW /* || LeftBumper == LOW || RightBumper == LOW || ( Current_Distance<850 && Current_Distance>120) */ ) {
     stop();
   }
 
-
-	if (RepeatTurnLCounter>0 && StopAfterN==0) {
-		RepeatTurnLCounter--;
-
-		if (RepeatTurnLCounter>10) {
-	    StopAfterN = 15;
-	    turn_L(RepeatTurnLCounterSpeed, RepeatTurnLCounterSpeed);
-	  }
-	}
-
-	if (RepeatTurnRCounter>0 && StopAfterN==0) {
-		RepeatTurnRCounter--;
-		if (RepeatTurnRCounter>10) {
-	    StopAfterN = 15;
-	    turn_R(RepeatTurnRCounterSpeed, RepeatTurnRCounterSpeed);
-	  }
-	}
 
   curMillis = millis();
   getDataFromPC();
@@ -481,9 +347,6 @@ void loop(void)
         if (SecondInt>120) { SecondInt=120; }
         StopAfterN = SecondInt;
         advance(FirstInt, FirstInt);
-
-        RepeatTurnLCounter=0;
-        RepeatTurnRCounter=0;
         if (SecondInt<10) { delay(250); }
     } else
 
@@ -498,9 +361,6 @@ void loop(void)
         if (SecondInt>120) { SecondInt=120; }
         StopAfterN = SecondInt;
         back_off(FirstInt, FirstInt);
-
-        RepeatTurnLCounter=0;
-        RepeatTurnRCounter=0;
         if (SecondInt<10) { delay(250); }
     } else
 
@@ -515,9 +375,6 @@ void loop(void)
         if (SecondInt>120) { SecondInt=120; }
         StopAfterN = SecondInt;
         turn_L(FirstInt, FirstInt);
-
-        RepeatTurnLCounter=0;
-        RepeatTurnRCounter=0;
         if (SecondInt<10) { delay(400); }
     } else
 
@@ -532,38 +389,7 @@ void loop(void)
         if (SecondInt>120) { SecondInt=120; }
         StopAfterN = SecondInt;
         turn_R(FirstInt, FirstInt);
-
-        RepeatTurnLCounter=0;
-        RepeatTurnRCounter=0;
         if (SecondInt<10) { delay(400); }
-    } else
-
-    if (strcmp(messageFromPC, "Repeat_L") == 0) {
-        Serial.print("{op:'repeat_turn_l', ");
-        Serial.print("speed:");
-        Serial.print(FirstInt);
-        Serial.print(", count:");
-        Serial.print(SecondInt);
-        Serial.println("}");
-
-        if (FirstInt>255) { FirstInt=255; }
-        if (SecondInt>40) { SecondInt=40; }
-        RepeatTurnLCounterSpeed = FirstInt;
-		    RepeatTurnLCounter = SecondInt;
-    } else
-
-    if (strcmp(messageFromPC, "Repeat_R") == 0) {
-        Serial.print("{op:'repeat_turn_r', ");
-        Serial.print("speed:");
-        Serial.print(FirstInt);
-        Serial.print(", count:");
-        Serial.print(SecondInt);
-        Serial.println("}");
-
-        if (FirstInt>255) { FirstInt=255; }
-        if (SecondInt>40) { SecondInt=40; }
-        RepeatTurnRCounterSpeed = FirstInt;
-		    RepeatTurnRCounter = SecondInt;
     } else
 
     if (strcmp(messageFromPC, "Current_Distance") == 0) {
@@ -573,39 +399,21 @@ void loop(void)
     } else
 
     if (strcmp(messageFromPC, "Sweep_Servos") == 0) {
-        if (CameraGoTo==0) { CameraGoTo = 180; } else { CameraGoTo = 0; }
-//        if (TOFGoTo==0) { TOFGoTo = 180; } else { TOFGoTo = 0; }
-
+        if (CameraGoTo==0) { CameraGoTo = SERVOMAX; } else { CameraGoTo = SERVOMIN; }
         Serial.println("{op:'sweep_servo', msg:'Sweeping Servos'}");
     } else
 
     if (strcmp(messageFromPC, "Home_Servos") == 0) {
-        CameraGoTo = 90;
-//        TOFGoTo = 90;
-
+        CameraGoTo = SERVOMAX/2;
         Serial.println("{op:'servo_to', msg:'Servo to 90'}");
     }
 
     if (strcmp(messageFromPC, "Stop") == 0) {
         stop();
         AutoDrive = 0;
-        RepeatTurnLCounter=0;
-        RepeatTurnRCounter=0;
-
-//        if (TOFServo.attached() ) { TOFServo.detach(); }
-        if (CameraServo.attached() ) { CameraServo.detach(); }
-
         Serial.println("{op:'stop', msg:'stop all'}");
     }
 
-//    else
-//    if (strcmp(messageFromPC, "Switch_Scan") == 0) {
-//        StartTOFScan = !StartTOFScan;
-//        Serial.print("{op:'switch_scan', value:");
-//        Serial.print(StartTOFScan);
-//        Serial.println("}");
-//    } else
-//
 //    if (strcmp(messageFromPC, "LCD") == 0) {
 //      Serial.print("{op:'lcd', ");
 //      Serial.print("set text to:");
@@ -616,16 +424,6 @@ void loop(void)
 //	    lcd.setCursor(FirstInt,SecondInt);
 //      lcd.print(StringMessage);
 //    } else
-//
-//    if (strcmp(messageFromPC, "Scan_GoTo") == 0) {
-//      Serial.print("{op:'scan_goto', ");
-//      Serial.print("CurrentValue:");
-//      Serial.print(TOFGoTo);
-//      Serial.print(", CurrentPos:");
-//      Serial.print(TOFPos);
-//      Serial.println("}");
-//      TOFGoTo = FirstInt;
-//    }
   }
 
   delay(5);
