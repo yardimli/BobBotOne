@@ -60,6 +60,7 @@ log_to_file("starting raspberry-pi-mjpeg-server.js");
 
 var SerialPort = serialport; // localize object constructor
 var portName = '/dev/ttyACM0';
+var portName = '/dev/ttyUSB0';
 
 var sp = new SerialPort(portName, {
 //  parser: serialport.parsers.readline("\r"),

@@ -27,16 +27,13 @@ int CameraGoTo = 90;
 int CameraPin = 10;
 
 
-///For previous Romeo, please use these pins.
-//int E1 = 6;     //M1 Speed Control
-//int E2 = 9;     //M2 Speed Control
-//int M1 = 7;    //M1 Direction Control
-//int M2 = 8;    //M1 Direction Control
+#define enA 9
+#define in1 4
+#define in2 5
+#define enB 10
+#define in3 6
+#define in4 7
 
-int E1 = 5;     //M1 Speed Control
-int E2 = 6;     //M2 Speed Control
-int M1 = 4;    //M1 Direction Control
-int M2 = 7;    //M1 Direction Control
 
 int kk = 0;
 int mm = 0;
@@ -149,9 +146,15 @@ void parseData() {
 
 void setup(void)
 {
-  int i;
-  for (i = 4; i <= 7; i++)
-    pinMode(i, OUTPUT);
+  pinMode(enA, OUTPUT);
+  pinMode(enB, OUTPUT);
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+  pinMode(in3, OUTPUT);
+  pinMode(in4, OUTPUT);
+  
+  pinMode(13, OUTPUT);
+
   Serial.begin(115200);      //Set Baud Rate
   Serial.println("{op:'start':mes:'Hello World'}");
 
@@ -432,40 +435,60 @@ void loop(void)
 
 void stop(void)                    //Stop
 {
-  digitalWrite(E1, LOW);
-  digitalWrite(E2, LOW);
+	analogWrite(enA, 0); 
+	analogWrite(enB, 0); 
 }
 
 void advance(char a, char b)         //Move forward
 {
-  analogWrite (E1, a);     //PWM Speed Control
-  digitalWrite(M1, HIGH);
-  analogWrite (E2, b);
-  digitalWrite(M2, HIGH);
+	// Set Motor A forward
+	digitalWrite(in1, LOW);
+	digitalWrite(in2, HIGH);
+	analogWrite(enA, a); // Send PWM signal to motor A
+
+	// Set Motor B forward
+	digitalWrite(in3, LOW);
+	digitalWrite(in4, HIGH);
+	analogWrite(enB, b); // Send PWM signal to motor B
 }
 
 void back_off(char a, char b)         //Move backward
 {
-  analogWrite (E1, a);
-  digitalWrite(M1, LOW);
-  analogWrite (E2, b);
-  digitalWrite(M2, LOW);
+	// Set Motor A backward
+	digitalWrite(in1, HIGH);
+	digitalWrite(in2, LOW);
+	analogWrite(enA, a); // Send PWM signal to motor A
+
+	// Set Motor B backward
+	digitalWrite(in3, HIGH);
+	digitalWrite(in4, LOW);
+	analogWrite(enB, b); // Send PWM signal to motor B
 }
 
 void turn_L(char a, char b)            //Turn Left
 {
-  analogWrite (E1, a);
-  digitalWrite(M1, HIGH);
-  analogWrite (E2, b);
-  digitalWrite(M2, LOW);
+	// Set Motor A forward
+	digitalWrite(in1, LOW);
+	digitalWrite(in2, HIGH);
+	analogWrite(enA, a); // Send PWM signal to motor A
+
+	// Set Motor B backward
+	digitalWrite(in3, HIGH);
+	digitalWrite(in4, LOW);
+	analogWrite(enB, b); // Send PWM signal to motor B
 }
 
 void turn_R(char a, char b)            //Turn Right
 {
-  analogWrite (E1, a);
-  digitalWrite(M1, LOW);
-  analogWrite (E2, b);
-  digitalWrite(M2, HIGH);
+	// Set Motor A backward
+	digitalWrite(in1, HIGH);
+	digitalWrite(in2, LOW);
+	analogWrite(enA, a); // Send PWM signal to motor A
+
+	// Set Motor B forward
+	digitalWrite(in3, LOW);
+	digitalWrite(in4, HIGH);
+	analogWrite(enB, b); // Send PWM signal to motor B
 }
 
 // you can use this function if you'd like to set the pulse length in seconds
