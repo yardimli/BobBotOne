@@ -1,5 +1,5 @@
 {
-  "name": "raspberry-pi-zero-bob-server",
+  "name": "pi-micro-bob",
   "version": "1.0.1",
   "description": "Node.js mjpeg streaming and arduino communication server for the Raspberry PI camera module for Bob Robot",
   "main": "server.js",
@@ -31,8 +31,11 @@
   "dependencies": {
     "chokidar": "^1.6.0",
     "commander": "^2.9.0",
-    "ip":"^1.1.4",
+    "i2c-bus": "^4.0.6",
+    "ip": "^1.1.4",
+    "localtunnel": "^1.9.0",
     "pubsub-js": "~1.5.2",
-    "localtunnel" : "^1.9.0"
+    "serialport": "^7.1.0",
+    "sleep": "^5.2.3"
   }
 }

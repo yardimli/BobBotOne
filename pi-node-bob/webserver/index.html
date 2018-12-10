@@ -1,9 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <title>Elo Fox One</title>
+  <title>Elo Bob One</title>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
-  <meta http-equiv="refresh" content="1800; url=index.html">
 
   <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
 
@@ -37,52 +36,37 @@
     </div>
 
     <div id="consoletop" style=" flex: 1; ">
-      <table>
+      <table style="max-width: 620px;">
         <tbody>
         <tr id="table_stream_0" class="highlight">
-          <td>240</td>
-          <td>34</td>
-          <td>2017-10-12 16:22:39</td>
-          <td>0.07</td>
-          <td>*</td>
-          <td>0.003</td>
-          <td>0.472</td>
-          <td>2017-10-12 16:22:39</td>
-          <td>3465</td>
-          <td>0846</td>
-          <td>9798</td>
-          <td>9629</td>
-          <td>29</td>
+          <td style="width:85px">240</td>
+          <td style="width:85px">34</td>
+          <td style="width:85px">0</td>
+          <td style="width:85px">0.07</td>
+          <td style="width:85px">0</td>
+          <td style="width:85px">0.07</td>
+          <td style="width:85px">*</td>
+          <td style="width:85px">0.003</td>
         </tr>
         <tr id="table_stream_1" class="">
-          <td>295</td>
-          <td>33</td>
-          <td>2017-10-12 16:21:37</td>
-          <td>0.067</td>
-          <td>*</td>
-          <td>0.003</td>
-          <td>0.418</td>
-          <td>2017-10-12 16:21:37</td>
-          <td>97</td>
-          <td>6165</td>
-          <td>6626</td>
-          <td>876</td>
-          <td>74</td>
+          <td style="width:85px">295</td>
+          <td style="width:85px">33</td>
+          <td style="width:85px">0</td>
+          <td style="width:85px">0.067</td>
+          <td style="width:85px">0</td>
+          <td style="width:85px">0.07</td>
+          <td style="width:85px">*</td>
+          <td style="width:85px">0.003</td>
         </tr>
         <tr id="table_stream_2">
-          <td>400</td>
-          <td>49</td>
-          <td>2017-10-12 16:13:02</td>
-          <td>0.141</td>
-          <td>*</td>
-          <td>0</td>
-          <td>0.388</td>
-          <td>2017-10-12 16:13:02</td>
-          <td>2347</td>
-          <td>5762</td>
-          <td>3465</td>
-          <td>4588</td>
-          <td>05</td>
+          <td style="width:85px">400</td>
+          <td style="width:85px">49</td>
+          <td style="width:85px">0</td>
+          <td style="width:85px">0.141</td>
+          <td style="width:85px">0</td>
+          <td style="width:85px">0.07</td>
+          <td style="width:85px">*</td>
+          <td style="width:85px">0</td>
         </tr>
         </tbody>
       </table>
@@ -116,7 +100,7 @@
           <div class="paneltop_bar">Motion 1</div>
           <div class="mainpanel">
             <div class="streambox">
-              <img src="/video_stream.jpg?time=1&pDelay=120000" id="stream_container" style="max-width:700px;" class="_rotateImage90">
+              <img src="/video_stream.jpg?time=1&pDelay=120000" id="stream_container" style="max-width:1024px; width: 100%; padding-top:5px; padding-right:5px;" class="_rotateImage90">
 
             </div>
 
@@ -147,15 +131,17 @@
           <figure>
             <span style="margin-top: 13px;"></span>
             <br>
-            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="<Turn_L,127,4,msg>">Left</div>
-            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="<Advance,127,4,msg>">Forward</div>
-            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="<Back_Off,127,4,msg>">Reverse</div>
-            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="<Turn_R,127,4,msg>">Right</div>
+            <div class="lcars2_button start_camera_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;">Start Camera</div>
+            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="/controls?operation=motion&FL=on&FL_dir=bkw&FL_speed=156&FR=on&FR_dir=fwd&FR_speed=156&BL=on&BL_dir=bkw&BL_speed=156&BR=on&BR_dir=fwd&BR_speed=156">Left</div>
+            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="/controls?operation=motion&FL=on&FL_dir=fwd&FL_speed=96&FR=on&FR_dir=fwd&FR_speed=96&BL=on&BL_dir=fwd&BL_speed=96&BR=on&BR_dir=fwd&BR_speed=96">Forward</div>
+            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="/controls?operation=motion&FL=on&FL_dir=bkw&FL_speed=96&FR=on&FR_dir=bkw&FR_speed=96&BL=on&BL_dir=bkw&BL_speed=96&BR=on&BR_dir=bkw&BR_speed=96">Reverse</div>
+            <div class="lcars2_button generic_btn" style="margin:0px; font-size: 2em; margin-bottom: 10px;" data-sendthis="/controls?operation=motion&FL=on&FL_dir=fwd&FL_speed=156&FR=on&FR_dir=bkw&FR_speed=156&BL=on&BL_dir=fwd&BL_speed=156&BR=on&BR_dir=bkw&BR_speed=156">Right</div>
             <div style="margin-top:5px; padding-left:50px" class="small text-left servoinfo">
             </div>
 
             <span>Camera Look</span>
             <div class="sliderRadio">
+              <label for="camera_200">0</label>
               <input type="radio" class="camera_btn" name="camera_radio" id="camera_200" value="<Camera_GoTo,200,0,msg>"/>
               <label for="camera_200">0</label>
               <input type="radio" class="camera_btn" name="camera_radio" id="camera_250" value="<Camera_GoTo,250,0,msg>"/>
@@ -201,7 +187,7 @@
     </div>
   </div>
   <div class="lcars_footer">
-    <h1>Elo Bob One&nbsp;*&nbsp; <span id="buildnumber">ELO-2001</span></h1>
+    <h1>Elo Micro Bob&nbsp;*&nbsp; <span id="buildnumber">ELO-1001</span></h1>
   </div>
 </div>
 

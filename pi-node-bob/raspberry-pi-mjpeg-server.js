@@ -184,6 +184,24 @@ var server = http.createServer(function (req, res) {
         case '.wav':
           contentType = 'audio/wav';
           break;
+        case '.ttf':
+          contentType = 'application/x-font-ttf';
+          break;
+        case '.otf':
+          contentType = 'application/x-font-opentype';
+          break;
+        case '.woff':
+          contentType = 'application/font-woff';
+          break;
+        case '.woff2':
+          contentType = 'application/font-woff2';
+          break;
+        case '.eot':
+          contentType = 'application/vnd.ms-fontobject';
+          break;
+        case '.svg':
+          contentType = 'image/svg+xml';
+          break;
       }
 
       if (!fs.existsSync(filePath) || (!fs.lstatSync(filePath).isFile())) {
@@ -211,7 +229,9 @@ var server = http.createServer(function (req, res) {
           }
         }
         else {
-          content = content.toString().replace(new RegExp("##MYIP##", 'g'), localIpAddress + ':' + port);
+          if (contentType==="text/html" ||contentType==="text/javascript") {
+            content = content.toString().replace(new RegExp("##MYIP##", 'g'), localIpAddress + ':' + port);
+          }
 
           res.writeHead(200, {
             'Content-Type': contentType,

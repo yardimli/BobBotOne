@@ -156,7 +156,7 @@ void setup(void)
   pinMode(13, OUTPUT);
 
   Serial.begin(115200);      //Set Baud Rate
-  Serial.println("{op:'start':mes:'Hello World'}");
+  Serial.println("{op:'start',mes:'Hello World'}");
 
 //  pinMode(RightBumperPin, INPUT); //Right Bumper
 //  pinMode(LeftBumperPin, INPUT); //Left Bumper

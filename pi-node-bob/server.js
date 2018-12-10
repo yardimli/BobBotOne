@@ -77,8 +77,8 @@ function startSerialControl() {
   clearTimeout(startSerialControl_timeout);
 
   startSerialControl_timeout = setTimeout(function () {
-    console.log("starting serial/server tunnel now.");
-    log_to_file("starting serial/server tunnel now.");
+    console.log("starting serial/server tunnel now. "+Bob_Settings.ServerSubDomain);
+    log_to_file("starting serial/server tunnel now. "+Bob_Settings.ServerSubDomain);
 
     serial_tunnel = child_process.fork('./raspberry-pi-mjpeg-server.js', ['-w', '820', '-l', '616', '-q', '15'], {silent: true});
 
@@ -97,16 +97,17 @@ function startSerialControl() {
 
 
 function killSerialControl() {
-  log_to_file("killing serial/server control in 15 min.");
+  log_to_file("killing serial/server control in 150 min. "+Bob_Settings.ServerSubDomain);
+  console.log("killing serial/server control in 150 min. "+Bob_Settings.ServerSubDomain);
   clearTimeout(killSerialControl_timeout);
   killSerialControl_timeout = setTimeout(function () {
-    console.log("killing serial/server control now.");
-    log_to_file("killing serial/server control now.");
+    console.log("killing serial/server control now. "+Bob_Settings.ServerSubDomain);
+    log_to_file("killing serial/server control now. "+Bob_Settings.ServerSubDomain);
 
     serial_tunnel.kill();
 
     startSerialControl();
-  }, 1000 * 60 * 15);
+  }, 1000 * 60 * 150);
 }
 
 

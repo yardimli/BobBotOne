@@ -19,6 +19,10 @@ var img;
 var canvas;
 var context;
 
+var StatusType = 0;
+var StatusRow = 0;
+var CameraRunning = false;
+
 
 function grayscale(input, output) {
   //Get the context for the loaded image
@@ -55,19 +59,25 @@ function grayscale(input, output) {
 
 // Two layers are always present (except at the very beginning), to avoid flicker
 setInterval(function () {
-  var img = document.getElementById('stream_container');
 
-//  console.log(img.width);
+  if (CameraRunning) {
+    var img = document.getElementById('stream_container');
 
-  canvas.width = img.width;
-  canvas.height = img.height;
+//  console.log(img.width+" "+img.height);
 
-  context.drawImage(img, 0, 0, img.width, img.height);
+    if (img.height > 0) {
 
-  var imageData = context.getImageData(0, 0, img.width, img.height);
-  var sobelData = Sobel(imageData);
-  var sobelImageData = sobelData.toImageData();
-  context.putImageData(sobelImageData, 0, 0);
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      context.drawImage(img, 0, 0, img.width, img.height);
+
+      var imageData = context.getImageData(0, 0, img.width, img.height);
+      var sobelData = Sobel(imageData);
+      var sobelImageData = sobelData.toImageData();
+      context.putImageData(sobelImageData, 0, 0);
+    }
+  }
 
 //  grayscale(canvas, canvas);
 }, 1000);
@@ -89,107 +99,109 @@ function GetTime() {
 }
 
 
-function GetStatus() {
-  var UrlToGet = "/read_data";
-  var data = {};
+function startCamera() {
+  let UrlToGet = "/start_camera";
 
-  $.ajax({
-    url: UrlToGet,
-    data: data,
-    success: function (data, status) {
-      if (status == "success" && data.length > 0) {
-        console.log("Status: " + status);
+  if (!CameraRunning) {
+    CameraRunning = true;
+    $.get(UrlToGet, function (data, status) {
+      console.log("Data: " + data + "    -- Status: " + status);
+
+      if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+        $("#stream_container").attr("src", "http://192.168.1.126:8080/video_stream.jpg?time=1&pDelay=120000");
+      }
+      else {
+        $("#stream_container").attr("src", "/video_stream.jpg?time=1&pDelay=120000");
+      }
+
+      setTimeout(function () {
+        CameraRunning = false;
+      }, 20000);
+
+    });
+  }
+}
+
+function GetStatus() {
+
+  if (StatusType == 0) {
+    StatusType = 1;
+  }
+  else {
+    StatusType = 0;
+  }
+
+  if (StatusType == 1) {
+    var QData = "<Get_Data,0,0,msg>";
+    var UrlToGet = "/write_data?q=" + QData;
+    $.get(UrlToGet, function (data, status) {
+      //console.log("Data: " + data + "    -- Status: " + status);
+    });
+  }
+
+  if (StatusType == 0) {
+    var UrlToGet = "/read_data";
+    var data = {};
+
+    $.ajax({
+      url: UrlToGet,
+      data: data,
+      success: function (data, status) {
+        if (status == "success" && data.length > 0) {
+          //console.log("Status: " + status);
 //        console.log(data);
 
 
-        $.each(data, function (key, value) {
-          key = key+0;
-          console.log(key);
+          $.each(data, function (key, value) {
+            key = key + 0;
+            StatusRow++;
+            if (StatusRow > 2) {
+              StatusRow = 0;
+            }
+//            console.log(key);
 //          console.log(value.data);
-          try {
-            var datajson = JSON.parse(value.data);
+            try {
+              var datajson = JSON.parse(value.data);
 //          console.log(datajson);
 
-            $("#table_stream_" + key + "").addClass("highlight");
+              $("#table_stream_" + StatusRow + "").addClass("highlight");
 
-            let key2 = key;
-            clearTimeout(StatusTimeout[key2]);
-            StatusTimeout[key2] = setTimeout(function () {
-              $("#table_stream_" + key2 + "").removeClass("highlight");
-            }, 3000);
+              let StatusRow2 = StatusRow;
+              clearTimeout(StatusTimeout[StatusRow2]);
+              StatusTimeout[StatusRow2] = setTimeout(function () {
+                $("#table_stream_" + StatusRow2 + "").removeClass("highlight");
+              }, 1250);
 
-            if (key <= 2) {
-              console.log(datajson["c"]);
-              $("#table_stream_" + key + " td:nth-child(1)").html(datajson["d"]);
-              $("#table_stream_" + key + " td:nth-child(2)").html(datajson["lb"]);
-              $("#table_stream_" + key + " td:nth-child(3)").html(datajson["rb"]);
-              $("#table_stream_" + key + " td:nth-child(4)").html(datajson["c"]);
-              $("#table_stream_" + key + " td:nth-child(5)").html(datajson["lh"]);
-              $("#table_stream_" + key + " td:nth-child(6)").html(datajson["rh"]);
+
+              $("#table_stream_" + StatusRow + " td:nth-child(1)").html(datajson["c"]);
+              $("#table_stream_" + StatusRow + " td:nth-child(2)").html(datajson["fle"]);
+              $("#table_stream_" + StatusRow + " td:nth-child(3)").html(datajson["fre"]);
+
+              $("#table_stream_" + StatusRow + " td:nth-child(4)").html(datajson["ble"]);
+              $("#table_stream_" + StatusRow + " td:nth-child(5)").html(datajson["bre"]);
+
+              $("#table_stream_" + StatusRow + " td:nth-child(6)").html(datajson["lh"]);
+              $("#table_stream_" + StatusRow + " td:nth-child(7)").html(datajson["rh"]);
+              $("#table_stream_" + StatusRow + " td:nth-child(8)").html(datajson["us"]);
+            } catch (e) {
+              console.log(e);
             }
-          } catch(e) {
-            console.log(e);
-          };
 
-        });
+          });
 
-      }
-      // if (LastStatusCheck == null) LastStatusCheck = data;
-      //
-      // $.each(data, function (key, value) {
-      //   console.log(key);
-      //   console.log(value);
-      //   key = 2;
-      //
-      //   $("#table_stream_" + key + "").addClass("highlight");
-      //
-      //   let key2 = key;
-      //
-      //   clearTimeout(StatusTimeout[key2]);
-      //
-      //   StatusTimeout[key2] = setTimeout(function () {
-      //     $("#table_stream_" + key2 + "").removeClass("highlight");
-      //   }, 5000);
 
-      /*
-          $("#table_stream_" + key + " td:nth-child(1)").html(value["servo"].servo_pos);
-          $("#table_stream_" + key + " td:nth-child(2)").html(value["preview"].upload_left);
-          $("#table_stream_" + key + " td:nth-child(3)").html(value["preview"].timestamp);
-          $("#table_stream_" + key + " td:nth-child(4)").html((Math.round(value["preview"].time_taken * 1000) / 1000));
-          $("#table_stream_" + key + " td:nth-child(5)").html('*');
-          $("#table_stream_" + key + " td:nth-child(6)").html((Math.round(value["preview"].capture_time * 1000) / 1000));
-          if (typeof value["fullsize"] != 'undefined') {
-              if ('time_taken' in value["fullsize"]) {
-                  $("#table_stream_" + key + " td:nth-child(7)").html((Math.round(value["fullsize"].time_taken * 1000) / 1000));
-              }
-              else {
-                  $("#table_stream_" + key + " td:nth-child(7)").html("?");
-              }
-          }
-          else {
-              $("#table_stream_" + key + " td:nth-child(7)").html("??");
-          }
-          $("#table_stream_" + key + " td:nth-child(8)").html(value["preview"].timestamp);
-      */
+        }
 
-      LastStatusCheck = data;
-
-      backgroundCheck = setTimeout(function () {
-        GetStatus();
-      }, 1000);
-    },
-    dataType: "json"
-  });
-}
-
-var cameraPreviewID = 0;
-$(document).ready(function () {
-//    document.body.webkitRequestFullScreen();
-
-  if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-    $("#stream_container").attr("src", "http://192.168.1.133:8080/video_stream.jpg?time=1&pDelay=120000");
+        LastStatusCheck = data;
+      },
+      dataType: "json"
+    });
   }
 
+
+}
+
+$(document).ready(function () {
   canvas = document.getElementById("image_process_canvas");
   context = canvas.getContext("2d");
 
@@ -197,8 +209,9 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "w", on_keyup: function () {
-      var QData = "<Advance,255,120,msg>";
-      var UrlToGet = "/write_data?q=" + QData;
+      startCamera();
+      var QData = "operation=motion&FL=on&FL_dir=fwd&FL_speed=96&FR=on&FR_dir=fwd&FR_speed=96&BL=on&BL_dir=fwd&BL_speed=96&BR=on&BR_dir=fwd&BR_speed=96";
+      var UrlToGet = "/controls?" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
@@ -207,28 +220,9 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "s", on_keyup: function () {
-      var QData = "<Back_Off,255,60,msg>";
-      var UrlToGet = "/write_data?q=" + QData;
-      $.get(UrlToGet, function (data, status) {
-        console.log("Data: " + data + "    -- Status: " + status);
-      });
-    }
-  });
-
-  listener.register_combo({
-    keys: "q", on_keyup: function () {
-      var QData = "<Turn_L,255,35,msg>";
-      var UrlToGet = "/write_data?q=" + QData;
-      $.get(UrlToGet, function (data, status) {
-        console.log("Data: " + data + "    -- Status: " + status);
-      });
-    }
-  });
-
-  listener.register_combo({
-    keys: "e", on_keyup: function () {
-      var QData = "<Turn_R,255,35,msg>";
-      var UrlToGet = "/write_data?q=" + QData;
+      startCamera();
+      var QData = "operation=motion&FL=on&FL_dir=bkw&FL_speed=96&FR=on&FR_dir=bkw&FR_speed=96&BL=on&BL_dir=bkw&BL_speed=96&BR=on&BR_dir=bkw&BR_speed=96";
+      var UrlToGet = "/controls?" + QData;
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
@@ -237,9 +231,10 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "a", on_keyup: function () {
-      var QData = "<Turn_L,255,90,msg>";
-//      var QData = "<Repeat_L,255,55,msg>";
-      var UrlToGet = "/write_data?q=" + QData;
+      startCamera();
+      var QData = "operation=motion&FL=on&FL_dir=bkw&FL_speed=156&FR=on&FR_dir=fwd&FR_speed=156&BL=on&BL_dir=bkw&BL_speed=156&BR=on&BR_dir=fwd&BR_speed=156";
+      var UrlToGet = "/controls?" + QData;
+
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
@@ -248,9 +243,10 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "d", on_keyup: function () {
-      var QData = "<Turn_R,255,90,msg>";
-//      var QData = "<Repeat_R,255,55,msg>";
-      var UrlToGet = "/write_data?q=" + QData;
+      startCamera();
+      var QData = "operation=motion&FL=on&FL_dir=fwd&FL_speed=156&FR=on&FR_dir=bkw&FR_speed=156&BL=on&BL_dir=fwd&BL_speed=156&BR=on&BR_dir=bkw&BR_speed=156";
+      var UrlToGet = "/controls?" + QData;
+
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
@@ -259,8 +255,10 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "x", on_keyup: function () {
-      var QData = "<Stop,0,0,msg>";
-      var UrlToGet = "/write_data?q=" + QData;
+      startCamera();
+      var QData = "operation=motion&FL=off&FR=off&BL=off&BR=off";
+      var UrlToGet = "/controls?" + QData;
+
       $.get(UrlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
@@ -269,19 +267,36 @@ $(document).ready(function () {
 
   setInterval(function () {
     $("#clockplace").html(GetTime());
-  }, 1000);
+    GetStatus();
+  }, 500);
 
-  GetStatus();
+
+  $('.start_camera_btn').on('click', function () {
+    startCamera();
+    var xnum = Math.random();
+    document.getElementById('panel-beep3').play();
+  });
 
 
   $('.generic_btn').on('click', function () {
-    var xnum = Math.random();
     document.getElementById('panel-beep3').play();
-    var UrlToGet = "/write_data?q=" + $(this).data("sendthis");
 
+    var UrlToGet = $(this).data("sendthis");
     $.get(UrlToGet, function (data, status) {
       console.log("Data: " + data + "    -- Status: " + status);
     });
+
+    startCamera();
+
+    setTimeout(function () {
+      let QData = "operation=motion&FL=off&FR=off&BL=off&BR=off";
+      let UrlToGet = "/controls?" + QData;
+
+      $.get(UrlToGet, function (data, status) {
+        console.log("Data: " + data + "    -- Status: " + status);
+      });
+
+    }, 2000);
   });
 
   $('.scan_btn').on('click', function () {

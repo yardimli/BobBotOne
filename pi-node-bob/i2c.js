@@ -2,6 +2,11 @@ const raspi = require('raspi');
 const I2C = require('raspi-i2c').I2C;
 
 raspi.init(() => {
+
+  const servo_i2c = new I2C();
+  console.log(servo_i2c.readByteSync(0x6F));
+
+
   const i2c = new I2C();
   console.log(i2c.readByteSync(0x10)); // Read one byte from the device at address 18
 
