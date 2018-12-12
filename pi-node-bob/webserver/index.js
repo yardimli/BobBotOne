@@ -116,7 +116,7 @@ function startCamera() {
 
       setTimeout(function () {
         CameraRunning = false;
-      }, 20000);
+      }, 10000);
 
     });
   }
@@ -201,9 +201,147 @@ function GetStatus() {
 
 }
 
+var s = function (sel) {
+  return document.querySelector(sel);
+};
+
 $(document).ready(function () {
   canvas = document.getElementById("image_process_canvas");
   context = canvas.getContext("2d");
+
+  var static = nipplejs.create({
+    zone: s('.zone.static'),
+    mode: 'static',
+    position: {
+      left: '90px',
+      top: '230px'
+    },
+    color: 'red'
+  });
+
+
+  static.on('hidden', function (evt, data) {
+    var QData = "operation=motion&FL=off&FR=off&BL=off&BR=off";
+    var UrlToGet = "/controls?" + QData;
+
+    $.get(UrlToGet, function (data, status) {
+      console.log("Data: " + data + "    -- Status: " + status);
+    });
+  });
+
+
+  static.on('start end', function (evt, data) {
+//    console.log(evt);
+//    console.log(data);
+
+    if (evt.type === "end") {
+      var QData = "operation=motion&FL=off&FR=off&BL=off&BR=off";
+      var UrlToGet = "/controls?" + QData;
+
+      $.get(UrlToGet, function (data, status) {
+        console.log("Data: " + data + "    -- Status: " + status);
+
+        var UrlToGet = "/write_data?q=<Set_Face,1,3,>";
+        $.get(UrlToGet, function (data, status) {
+          console.log("Data: " + data + "    -- Status: " + status);
+        });
+
+      });
+    } else
+    {
+      var UrlToGet = "/write_data?q=<Set_Face,1,6,>";
+      $.get(UrlToGet, function (data, status) {
+        console.log("Data: " + data + "    -- Status: " + status);
+      });
+    }
+
+  });
+
+  function resolveToPoint(rad, diameter) {
+    var r = diameter / 2;
+    return {mX: r * Math.cos(rad), mY: r * Math.sin(rad)};
+  }
+
+  static.on('move', function (evt, data) {
+//    console.log(evt);
+    console.log(data);
+
+    //90 to 0 == forward to right
+    //270 to 360 == reverse to right
+    //180 to 270 == left to reverse
+    //180 to 90 == left to forward
+
+    if (typeof data.angle.radian !== "undefined") {
+      var QData = "";
+      var XYSpeed = resolveToPoint(data.angle.radian, data.distance * 2);
+//      console.log(data.angle.radian);
+//      console.log(resolveToPoint(data.angle.radian, 100));
+
+      console.log(XYSpeed);
+
+
+      if (XYSpeed.mY > 5 || XYSpeed.mY < -5) {
+
+        var Left_Direction = "fwd";
+        var Right_Direction = "fwd";
+        var Left_Speed = 0;
+        var Right_Speed = 0;
+
+        var YValue = Math.round(data.distance * 3);
+
+        var XValue = XYSpeed.mX;
+        if (XValue < 0) {
+          XValue = XValue * (-1);
+        }
+
+        XValue = Math.round((50 - XValue) / 50);
+
+        if (XYSpeed.mY < 5) {
+          Left_Direction = "bkw";
+          Right_Direction = "bkw";
+          Left_Speed = YValue;
+          Right_Speed = YValue;
+
+          if (XYSpeed.mX > 5) Right_Speed = Math.round(Right_Speed * XValue);
+          if (XYSpeed.mX < -5) Left_Speed = Math.round(Left_Speed * XValue);
+
+          var UrlToGet = "/write_data?q=<Set_Face,1,8,>";
+          $.get(UrlToGet, function (data, status) {
+            console.log("Data: " + data + "    -- Status: " + status);
+          });
+
+        } else
+        {
+          var UrlToGet = "/write_data?q=<Set_Face,1,10,>";
+          $.get(UrlToGet, function (data, status) {
+            console.log("Data: " + data + "    -- Status: " + status);
+          });
+
+        }
+
+        if (XYSpeed.mY > 5) {
+          Left_Direction = "fwd";
+          Right_Direction = "fwd";
+          Left_Speed = YValue;
+          Right_Speed = YValue;
+
+          if (XYSpeed.mX > 5) Right_Speed = Math.round(Right_Speed * XValue);
+          if (XYSpeed.mX < -5) Left_Speed = Math.round(Left_Speed * XValue);
+        }
+
+        QData = "operation=motion&FL=on&FL_dir=" + Left_Direction + "&FL_speed=" + Left_Speed + "&FR=on&FR_dir=" + Right_Direction + "&FR_speed=" + Right_Speed + "&BL=on&BL_dir=" + Left_Direction + "&BL_speed=" + Left_Speed + "&BR=on&BR_dir=" + Right_Direction + "&BR_speed=" + Right_Speed + "";
+      }
+
+      if (QData !== "") {
+        startCamera();
+        var UrlToGet = "/controls?" + QData;
+        $.get(UrlToGet, function (data, status) {
+          console.log("Data: " + data + "    -- Status: " + status);
+        });
+      }
+    }
+  });
+
 
   var listener = new window.keypress.Listener();
 
@@ -318,4 +456,5 @@ $(document).ready(function () {
       console.log("Data: " + data + "    -- Status: " + status);
     });
   });
-});
+})
+;
