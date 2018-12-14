@@ -1,0 +1,3 @@
+face1 ; 10
+face2 ; 12
+face3 ; 6
