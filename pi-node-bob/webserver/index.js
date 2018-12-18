@@ -201,6 +201,29 @@ function GetStatus() {
 
 }
 
+function detectmob() {
+  if( navigator.userAgent.match(/Android/i)
+    || navigator.userAgent.match(/webOS/i)
+    || navigator.userAgent.match(/iPhone/i)
+    || navigator.userAgent.match(/iPad/i)
+    || navigator.userAgent.match(/iPod/i)
+    || navigator.userAgent.match(/BlackBerry/i)
+    || navigator.userAgent.match(/Windows Phone/i)
+  ){
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+function detectmob2() {
+  if(window.innerWidth <= 800 && window.innerHeight <= 600) {
+    return true;
+  } else {
+    return false;
+  }
+}
 var s = function (sel) {
   return document.querySelector(sel);
 };
@@ -209,15 +232,30 @@ $(document).ready(function () {
   canvas = document.getElementById("image_process_canvas");
   context = canvas.getContext("2d");
 
-  var static = nipplejs.create({
-    zone: s('.zone.static'),
-    mode: 'static',
-    position: {
-      left: '90px',
-      top: '230px'
-    },
-    color: 'red'
-  });
+  if (detectmob() || detectmob2()) {
+    var static = nipplejs.create({
+      zone: s('.panels_div'),
+      mode: 'static',
+      size: 200,
+      position: {
+        left: '50%',
+        top: '50%'
+      },
+      color: 'red'
+    });
+  } else {
+    $("#joystick_block").html("<div class=\"zone static\" style=\"z-index: 99\"></div>");
+    var static = nipplejs.create({
+      zone: s('.panels_div'),
+      mode: 'static',
+      size: 200,
+      position: {
+        left: '50%',
+        top: '50%'
+      },
+      color: 'red'
+    });
+  }
 
 
   static.on('hidden', function (evt, data) {
