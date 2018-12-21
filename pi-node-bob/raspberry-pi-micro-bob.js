@@ -23,6 +23,36 @@ var sleep = require('sleep');
 
 var motor_hat = new Adafruit_MotorHAT(0x6f, 60);
 
+var FrontLeft = motor_hat.getMotor(1);
+var BackLeft = motor_hat.getMotor(2);
+
+var FrontRight = motor_hat.getMotor(3);
+var BackRight = motor_hat.getMotor(4);
+
+var log_filename = './logs/serial-server.log';
+
+var camera = new PiCamera();
+
+var portName = "";
+portName = '/dev/ttyACM0';
+portName = '/dev/ttyUSB0';
+var ArduinoPort;
+var SerialData = [];
+var SerialBuffer = "";
+
+var camera_port = 8080;
+var camera_width = 820;
+var camera_height = 616;
+var camera_timeout = 30 * 1000;
+var camera_timelapse = 500;
+var camera_quality = 15;
+var camera_tmpFolder = os.tmpdir();
+var camera_tmpImage = pjson.name + '-image.jpg';
+var localIpAddress = localIp.address();
+var boundaryID = "BOUNDARY";
+
+
+var DistanceArray = [];
 
 var turnOffMotors = () => {
   motor_hat.getMotor(1).run(Adafruit_MotorHAT.RELEASE);
@@ -36,26 +66,6 @@ process.on('exit', (code) => {
   console.log('About to exit with code:', code);
 });
 
-var FrontLeft = motor_hat.getMotor(1);
-var BackLeft = motor_hat.getMotor(2);
-
-var FrontRight = motor_hat.getMotor(3);
-var BackRight = motor_hat.getMotor(4);
-
-for (var j = 0; j < 2; j++) {
-  for (var i = 300; i < 420; i++) {
-    motor_hat.getPWM().setPWM(1, 0, i);
-    motor_hat.getPWM().setPWM(15, 0, i);
-    sleep.usleep(10000);
-  }
-
-  motor_hat.getPWM().setPWM(1, 0, 0);
-  sleep.usleep(10000);
-  motor_hat.getPWM().setPWM(15, 0, 0);
-  sleep.usleep(10000);
-}
-
-var log_filename = './logs/serial-server.log';
 
 function log_to_file(logstr) {
   fs.appendFile(log_filename, new Date().toString() + " " + logstr + "\r\n", function (err) {
@@ -66,11 +76,6 @@ function log_to_file(logstr) {
     }
   });
 }
-
-//--------------------------------------------------------------------------------------------------------------
-// setup the camera
-var camera = new PiCamera();
-
 
 Object.keys(ifaces).forEach(function (ifname) {
   var alias = 0;
@@ -97,14 +102,18 @@ Object.keys(ifaces).forEach(function (ifname) {
 log_to_file("===================================================================");
 log_to_file("starting raspberry-pi-mjpeg-server.js");
 
+for (var j = 0; j < 2; j++) {
+  for (var i = 300; i < 420; i++) {
+    motor_hat.getPWM().setPWM(1, 0, i);
+    motor_hat.getPWM().setPWM(15, 0, i);
+    sleep.usleep(10000);
+  }
 
-var portName = "";
-portName = '/dev/ttyACM0';
-portName = '/dev/ttyUSB0';
-var ArduinoPort;
-var SerialData = [];
-var SerialBuffer = "";
-
+  motor_hat.getPWM().setPWM(1, 0, 0);
+  sleep.usleep(10000);
+  motor_hat.getPWM().setPWM(15, 0, 0);
+  sleep.usleep(10000);
+}
 
 function requireUncached(module) {
   delete require.cache[require.resolve(module)];
@@ -160,10 +169,25 @@ function openPort() {
           SerialData.push({data: NewLine, count: 1});
           try {
             var datajson = JSON.parse(NewLine);
-            if (parseInt(datajson["us"]) == 0) {
-              datajson["us"] = 200;
+            var xDistance = parseInt(datajson["us"]);
+            if (xDistance === 0) {
+              xDistance = 200;
             }
-            if (parseInt(datajson["us"]) < 15) {
+
+            DistanceArray.push(xDistance);
+
+            if (DistanceArray.length > 4) {
+              DistanceArray.shift();
+            }
+
+            var DistanceSum = 0;
+            for (var i = 0; i < DistanceArray.length; i++) {
+              DistanceSum += DistanceArray[i];
+            }
+
+            datajson["us_avg"] = Math.round(DistanceSum / DistanceArray.length);
+
+            if (Math.round(DistanceSum / DistanceArray.length) < 15) {
               console.log("us sensor stop motors");
               turnOffMotors();
             }
@@ -185,17 +209,6 @@ function openPort() {
 
 openPort();
 
-
-var camera_port = 8080;
-var camera_width = 820;
-var camera_height = 616;
-var camera_timeout = 30 * 1000;
-var camera_timelapse = 500;
-var camera_quality = 15;
-var camera_tmpFolder = os.tmpdir();
-var camera_tmpImage = pjson.name + '-image.jpg';
-var localIpAddress = localIp.address();
-var boundaryID = "BOUNDARY";
 
 /**
  * create a server to serve out the motion jpeg images
@@ -222,10 +235,10 @@ var server = http.createServer(function (req, res) {
     //classic web server
     //--------------------------------------------------------------------------------------------------------------
     if (xpath.indexOf("/webserver") !== -1) {
-      var filePath = '.' + req.url;
+      var filePath = '.' + xpath; // req.url;
 //    if (filePath === './webserver') filePath = './webserver/index.html';
 
-      var extname = path.extname(filePath);
+      var extname = path.extname(xpath);
       switch (extname) {
         case '.js':
           contentType = 'text/javascript';
