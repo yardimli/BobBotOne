@@ -458,18 +458,22 @@ var server = http.createServer(function (req, res) {
 
       if (query.operation === "servo") {
         if (query.pan_servo === "on") {
-          motor_hat.getPWM().setPWM(0, 0, 300);
-          motor_hat.getPWM().setPWM(1, 0, 300);
+          motor_hat.getPWM().setPWM(15, 0, parseInt(query.pan_servo_pulse));
         }
-        else {
+        else if (query.pan_servo === "off") {
+          motor_hat.getPWM().setPWM(15, 0, 0);
         }
 
         if (query.tilt_servo === "on") {
-          motor_hat.getPWM().setPWM(0, 0, 300);
-          motor_hat.getPWM().setPWM(1, 0, 300);
+          motor_hat.getPWM().setPWM(1, 0, parseInt(query.tilt_servo_pulse));
         }
-        else {
+        else if (query.tilt_servo === "off") {
+
+          motor_hat.getPWM().setPWM(1, 0, 0);
         }
+
+        res.end(JSON.stringify({result: true, message: "servos updated"}));
+        return;
       }
 
       if (query.operation === "motion") {
@@ -604,7 +608,8 @@ var server = http.createServer(function (req, res) {
         res.end(content, 'utf-8');
       });
     }
-  })
+  }
+  )
 ;
 
 //--------------------------------------------------------------------------------------------------------------
