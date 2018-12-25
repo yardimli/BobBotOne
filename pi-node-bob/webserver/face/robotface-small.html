@@ -4,38 +4,102 @@
   <title>Elo Bob Face</title>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
 
-  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <link href="//fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
 
-  <script src="js/jquery-1.11.3.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 
-  <link href="css/bootstrap.css" rel="stylesheet" type="text/css">
-  <script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+          crossorigin="anonymous"></script>
+  <script src="//stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+          crossorigin="anonymous"></script>
 
-  <link href='https://fonts.googleapis.com/css?family=Oswald:400' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
-  <link rel="icon" type="image/png" href="/webserver/favicon.ico">
+  <link href='//fonts.googleapis.com/css?family=Oswald:400' rel='stylesheet' type='text/css'>
+
+  <link rel="icon" type="image/png" href="../webserver/favicon.ico">
 </head>
 
-<body style=" background: lightblue; margin:0px; padding:0px; overflow: hidden;">
-<canvas id="canvas" width="420px" height="420px" style="background: #fff; margin:0px"></canvas>
+<body style="background-color: #ccc;">
+<header>
+  <div class="collapse bg-dark" id="navbarHeader">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-8 col-md-7 py-4">
+          <h4 class="text-white">About</h4>
+          <p class="text-muted">Grid Editor for Bob Micro Bot LED Face.</p>
+        </div>
+        <div class="col-sm-4 offset-md-1 py-4">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="navbar navbar-dark bg-dark shadow-sm">
+    <div class="container d-flex justify-content-between">
+      <a href="#" class="navbar-brand d-flex align-items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round" class="mr-2" focusable="false" aria-hidden="true">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <strong>Robot Face</strong>
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false"
+              aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </div>
+</header>
 
-<div class="dropdown" style="position: absolute; left:700px; top:10px;">
-  <button class="btn btn-warning dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"
-          style="background-color: black;">&nbsp;<span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="face_list">
-    <li><a href="#AnimationModal" data-toggle="modal">Face Animations</a></li>
-    <li><a href="#exampleModal" data-toggle="modal">Save Design</a></li>
-  </ul>
+<div style="margin: 10px;">
+  <div style="vertical-align: top;">
+    <div style=" display: inline-block;vertical-align: top;">
+      <canvas id="canvas" width="420px" height="420px" style="background: #fff; margin:0px;"></canvas>
+    </div>
+
+    <div style=" display: inline-block;vertical-align: top;">
+      <canvas id="mini_canvas" width="420px" height="420px" style="background: #fff; margin:0px;"></canvas>
+    </div>
+  </div>
+
+  <div style="vertical-align: top;">
+    <div class="dropdown" style=" display: inline-block;vertical-align: top;">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Operations
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenu1" id="face_list">
+        <a class="dropdown-item" href="#AnimationModal" data-toggle="modal">Face Animations</a>
+        <a class="dropdown-item" href="#exampleModal" data-toggle="modal">Save Design</a>
+      </div>
+    </div>
+
+    <div class="dropdown" style=" display: inline-block;vertical-align: top;">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="colorMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Colors
+      </button>
+      <div class="dropdown-menu" aria-labelledby="colorMenu" id="color_list">
+        <a class="dropdown-item color_menu" href="#select_color" data-toggle="modal" data-color="Red">Red</a>
+        <a class="dropdown-item color_menu" href="#select_color" data-toggle="modal" data-color="Green">Green</a>
+        <a class="dropdown-item color_menu" href="#select_color" data-toggle="modal" data-color="Yellow">Yellow</a>
+        <a class="dropdown-item color_menu" href="#select_color" data-toggle="modal" data-color="Blue">Blue</a>
+        <a class="dropdown-item color_menu" href="#select_color" data-toggle="modal" data-color="Purple">Purple</a>
+        <a class="dropdown-item color_menu" href="#select_color" data-toggle="modal" data-color="Cyan">Cyan</a>
+        <a class="dropdown-item color_menu" href="#select_color" data-toggle="modal" data-color="White">White</a>
+      </div>
+    </div>
+  </div>
 </div>
-
 
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="exampleModalLabel">New Face</h4>
+        <h5 class="modal-title" id="exampleModalLabel">New Face</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -52,12 +116,14 @@
 </div>
 
 
-<div class="modal fade" id="AnimationModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+<div class="modal fade" id="AnimationModal" tabindex="-1" role="dialog" aria-labelledby="AnimationModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="AnimationModalLabel">New Face Animation</h4>
+        <h5 class="modal-title" id="AnimationModalLabel">New Face Animation</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
 
@@ -96,13 +162,16 @@
 <script>
   var canvas = document.getElementById("canvas");
   var context = canvas.getContext("2d");
-  var bw = window.innerWidth;
-  var bh = window.innerHeight;
+
+  var mini_canvas = document.getElementById("mini_canvas");
+  var mini_context = mini_canvas.getContext("2d");
+
   var p = 0;
 
   var Highlights = [];
   var MouseCurrentX = 0;
   var MouseCurrentY = 0;
+  var CurrentColor = "blue";
   var LastMouseCurrentX = 0;
   var LastMouseCurrentY = 0;
   var SaveHighlights = [];
@@ -112,6 +181,7 @@
   var PlayAnimation = false;
   var PlayAnimationIntCounter = 0;
 
+  var DivideMiniScreen = 2.5;
 
   //---------------------------------------------------------------------------------------------------------------------------
   function LoadFaceFile(face_name) {
@@ -142,8 +212,8 @@
   function drawLED() {
     var grd;
 
-    for (var y = 0; y <= bh; y += 40) {
-      for (var x = 0; x <= bw; x += 40) {
+    for (var y = 0; y <= 8 * 40; y += 40) {
+      for (var x = 0; x <= 16 * 40; x += 40) {
         grd = context.createLinearGradient(0.5 + x, 0.5 + y, 0.5 + x + 40, 0.5 + y + 40);
 
         if ((y / 40) === MouseCurrentY && (x / 40) === MouseCurrentX) {
@@ -157,6 +227,14 @@
 
         context.fillStyle = grd;
         context.fillRect(0.5 + x, 0.5 + y, 40, 40);
+
+        grd = context.createLinearGradient(0.5 + (x / DivideMiniScreen), 0.5 + (y / DivideMiniScreen), 0.5 + (x / DivideMiniScreen) + (40 / DivideMiniScreen), 0.5 + (y / DivideMiniScreen) + (40 / DivideMiniScreen));
+        grd.addColorStop(0, "#000");
+        grd.addColorStop(1, "#222");
+        mini_context.fillStyle = grd;
+        mini_context.fillRect(0.5 + (x / DivideMiniScreen), 0.5 + (y / DivideMiniScreen), 40 / DivideMiniScreen, 40 / DivideMiniScreen);
+
+
       }
     }
 
@@ -168,7 +246,16 @@
         0.5 + (Highlights[i].Y * 40),
         0.5 + 40 + (Highlights[i].X * 40),
         0.5 + 40 + (Highlights[i].Y * 40));
-      grd.addColorStop(0, "yellow");
+
+      var DrawColor = "Yellow";
+      if (typeof Highlights[i].Color === "undefined") {
+
+      }
+      else {
+        DrawColor = Highlights[i].Color;
+      }
+
+      grd.addColorStop(0, DrawColor);
       grd.addColorStop(1, "#333");
 
       context.fillStyle = grd;
@@ -177,6 +264,22 @@
         0.5 + (Highlights[i].Y * 40),
         40,
         40);
+
+      grd = context.createLinearGradient(
+        0.5 + (Highlights[i].X * (40 / DivideMiniScreen)),
+        0.5 + (Highlights[i].Y * (40 / DivideMiniScreen)),
+        0.5 + (40 / DivideMiniScreen) + (Highlights[i].X * (40 / DivideMiniScreen)),
+        0.5 + (40 / DivideMiniScreen) + (Highlights[i].Y * (40 / DivideMiniScreen)));
+      grd.addColorStop(0, DrawColor);
+      grd.addColorStop(1, DrawColor);
+
+      mini_context.fillStyle = grd;
+      mini_context.fillRect(
+        0.5 + (Highlights[i].X * (40 / DivideMiniScreen)),
+        0.5 + (Highlights[i].Y * (40 / DivideMiniScreen)),
+        (40 / (DivideMiniScreen + 2)),
+        (40 / (DivideMiniScreen + 2)));
+
     }
   }
 
@@ -184,13 +287,13 @@
   //---------------------------------------------------------------------------------------------------------------------------
   function drawBoard() {
 
-    for (var x = 0; x <= bw; x += 40) {
-      context.moveTo(0.5 + x + p, p);
-      context.lineTo(0.5 + x + p, bh + p);
+    for (var y = 0; y <= 16 * 40; y += 40) {
+      context.moveTo(0.5 + y + p, p);
+      context.lineTo(0.5 + y + p, bh + p);
     }
 
 
-    for (var x = 0; x <= bh; x += 40) {
+    for (var x = 0; x <= 8 * 40; x += 40) {
       context.moveTo(p, 0.5 + x + p);
       context.lineTo(bw + p, 0.5 + x + p);
     }
@@ -218,19 +321,6 @@
 
   //---------------------------------------------------------------------------------------------------------------------------
   $(document).ready(function () {
-
-    // //---------------------------------------------------------------------------------------------------------------------------
-    // setTimeout(function () {
-    //   LoadFaceFile("face1.txt");
-    //
-    //   PlayAnimationSeq = [];
-    //   PlayAnimationSeq.push({"FileName": "face1", "Delay": 10});
-    //   PlayAnimationSeq.push({"FileName": "face2", "Delay": 10});
-    //   PlayAnimationRow = -1;
-    //   PlayAnimationIntCounter = 0;
-    //   PlayAnimation = true;
-    // }, 2000);
-
 
     setInterval(function () {
       if (PlayAnimation && PlayAnimationSeq.length > 0) {
@@ -266,7 +356,7 @@
       dataType: "json",
       success: function (data, status) {
         for (face in data) {
-          $("#face_list").append('<li><a href="#" class="load_face" data-face_name="' + data[face] + '">' + data[face] + '</a></li>\n');
+          $("#face_list").append('<a  class="dropdown-item load_face" href="#"  data-face_name="' + data[face] + '">' + data[face] + '</a>\n');
         }
 
         //---------------------------------------------------------------------------------------------------------------------------
@@ -284,6 +374,12 @@
 
     });
 
+    //---------------------------------------------------------------------------------------------------------------------------
+    $(".color_menu").on('click', function (e) {
+      CurrentColor = $(this).data("color");
+      e.preventDefault();
+    });
+
 
     //---------------------------------------------------------------------------------------------------------------------------
     var UrlToGet = "load_face_animations.php";
@@ -297,7 +393,7 @@
       success: function (data, status) {
         for (face in data) {
 //          console.log(data[face]);
-          $("#face_animation_list").append('<li><a href="#" class="load_face_animation" data-face_animation_name="' + data[face] + '">' + data[face] + '</a></li>\n');
+          $("#face_animation_list").append('<a href="#" class="dropdown-item load_face_animation" data-face_animation_name="' + data[face] + '">' + data[face] + '</a>\n');
         }
 
         //---------------------------------------------------------------------------------------------------------------------------
@@ -427,18 +523,18 @@
 
 
     //---------------------------------------------------------------------------------------------------------------------------
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    bw = 40*16;//window.innerWidth;
-    bh = 40*8;// window.innerHeight;
+    bw = 40 * 16;//window.innerWidth;
+    bh = 40 * 8;// window.innerHeight;
+    canvas.width = bw;
+    canvas.height = bh;
+
+    mini_canvas.width = bw / DivideMiniScreen;
+    mini_canvas.height = bh / DivideMiniScreen;
+
     drawLED();
     drawBoard();
 
     setTimeout(function () {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      bw = 40*16;//window.innerWidth;
-      bh = 40*8;// window.innerHeight;
       drawLED();
       drawBoard();
     }, 2000);
@@ -449,8 +545,12 @@
       MouseCurrentX = Math.floor(mousePos.x / 40);
       MouseCurrentY = Math.floor(mousePos.y / 40);
 
-      if (MouseCurrentX>=16) { MouseCurrentX = 16; }
-      if (MouseCurrentY>=8) { MouseCurrentY = 8; }
+      if (MouseCurrentX >= 16) {
+        MouseCurrentX = 16;
+      }
+      if (MouseCurrentY >= 8) {
+        MouseCurrentY = 8;
+      }
 
       if (MouseCurrentX !== LastMouseCurrentX || MouseCurrentY !== LastMouseCurrentY) {
         LastMouseCurrentX = MouseCurrentX;
@@ -481,14 +581,11 @@
       }
 
       if (!DeleteDot) {
-        Highlights.push({X: MouseCurrentX, Y: MouseCurrentY});
+        Highlights.push({X: MouseCurrentX, Y: MouseCurrentY, Color: CurrentColor});
       }
 
       drawLED();
       drawBoard();
-//      writeMessage(canvas, message);
-
-//  console.log(Highlights);
     }, false);
 
 
