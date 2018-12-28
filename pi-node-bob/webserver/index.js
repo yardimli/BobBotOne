@@ -29,6 +29,8 @@ var floor_sensor_left_array = [];
 var floor_sensor_right_array = [];
 var distance_sensor_array = [];
 
+
+var CameraStopTimeout;
 function checkTime(i) {
   if (i < 10) {
     i = "0" + i
@@ -142,13 +144,20 @@ function startCamera() {
       else {
         $("#stream_container").attr("src", "/video_stream.jpg?time=1&pDelay=120000");
       }
-
-      setTimeout(function () {
-        CameraRunning = false;
-      }, 10000);
-
     });
   }
+
+
+  clearTimeout(CameraStopTimeout);
+
+  CameraStopTimeout = setTimeout(function () {
+    let UrlToGet = hostname + "stop_camera";
+    $.get(UrlToGet, function (data, status) {
+      CameraRunning = false;
+      console.log("Data: " + data + "    -- Status: " + status);
+    });
+  }, 10000);
+
 }
 
 function GetStatus() {
@@ -365,19 +374,19 @@ $(document).ready(function () {
       var XYSpeed = resolveToPoint(data.angle.radian, data.distance * 2);
 
       if (XYSpeed.mX > 0) {
-        HeadTiltPosition = 460 - (XYSpeed.mX*2);
+        HeadTiltPosition = 460 - (XYSpeed.mX * 2);
       }
 
       if (XYSpeed.mX < 0) {
-        HeadTiltPosition = 460 - (XYSpeed.mX*2);
+        HeadTiltPosition = 460 - (XYSpeed.mX * 2);
       }
 
       if (XYSpeed.mY > 0) {
-        HeadPanPosition = 420 + (XYSpeed.mY*1);
+        HeadPanPosition = 420 + (XYSpeed.mY * 1);
       }
 
       if (XYSpeed.mY < 0) {
-        HeadPanPosition = 420 + (XYSpeed.mY*1);
+        HeadPanPosition = 420 + (XYSpeed.mY * 1);
       }
 
       HeadPanPosition = Math.round(HeadPanPosition);
@@ -404,7 +413,7 @@ $(document).ready(function () {
               console.log("Data: " + data + "    -- Status: " + status);
             });
           });
-        },50);
+        }, 50);
       }
 
     }

@@ -9,16 +9,15 @@ var fs = require("fs"),
   chokidar = require('chokidar'),
   PubSub = require("pubsub-js"),
   localIp = require('ip'),
-  PiCamera = require('./camera.js'),
+  child_process = require('child_process'),
+  serialport = require("serialport"),
+  qs = require("querystring"),
+  Adafruit_MotorHAT = require('./hat/Adafruit_MotorHAT/Adafruit_MotorHAT'),
   pjson = require('./package.json');
 
 var ifaces = os.networkInterfaces();
 
 
-var serialport = require("serialport");
-var qs = require("querystring");
-
-var Adafruit_MotorHAT = require('./hat/Adafruit_MotorHAT/Adafruit_MotorHAT');
 var sleep = require('sleep');
 
 var motor_hat = new Adafruit_MotorHAT(0x6f, 60);
@@ -31,8 +30,6 @@ var BackRight = motor_hat.getMotor(4);
 
 var log_filename = './logs/serial-server.log';
 
-var camera = new PiCamera();
-
 var portName = "";
 portName = '/dev/ttyACM0';
 portName = '/dev/ttyUSB0';
@@ -40,16 +37,18 @@ var ArduinoPort;
 var SerialData = [];
 var SerialBuffer = "";
 
-var camera_port = 80;
-var camera_width = 820;
-var camera_height = 616;
-var camera_timeout = 30 * 1000;
-var camera_timelapse = 500;
-var camera_quality = 15;
-var camera_tmpFolder = os.tmpdir();
-var camera_tmpImage = pjson.name + '-image.jpg';
+var robot_webserver_port = 80;
 var localIpAddress = localIp.address();
 var boundaryID = "BOUNDARY";
+
+// var camera_port = 80;
+// var camera_width = 820;
+// var camera_height = 616;
+// var camera_timeout = 30 * 1000;
+// var camera_timelapse = 500;
+// var camera_quality = 15;
+// var camera_tmpFolder = os.tmpdir();
+// var camera_tmpImage = pjson.name + '-image.jpg';
 
 
 var DistanceArray = [];
@@ -304,7 +303,7 @@ var server = http.createServer(function (req, res) {
         }
         else {
           if (contentType === "text/html" || contentType === "text/javascript") {
-            content = content.toString().replace(new RegExp("##MYIP##", 'g'), localIpAddress + ':' + camera_port);
+            content = content.toString().replace(new RegExp("##MYIP##", 'g'), localIpAddress + ':' + robot_webserver_port);
           }
 
           res.writeHead(200, {
@@ -524,20 +523,44 @@ var server = http.createServer(function (req, res) {
     }
 
     //--------------------------------------------------------------------------------------------------------------
+    else if (xpath === "/stop_camera") {
+
+      child_process.exec('./stop_camera.sh',
+        function (error, stdout, stderr) {
+          console.log('stdout: ' + stdout);
+          console.log('stderr: ' + stderr);
+          if (error !== null) {
+            console.log('exec error: ' + error);
+          }
+        });
+
+      res.writeHead(200, {
+        'Content-Type': 'text/html',
+        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Request-Method': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET',
+        'Access-Control-Allow-Headers': '*'
+      });
+
+      res.end("stopped camera");
+      return;
+    }
+
+
+    //--------------------------------------------------------------------------------------------------------------
     else if (xpath === "/start_camera") {
 
-// start image capture
-      camera
-        .nopreview()
-        .baseFolder(camera_tmpFolder)
-        .thumb('0:0:0') // dont include thumbnail version
-        .timeout(camera_timeout) // never end
-        .timelapse(camera_timelapse) // how often we should capture an image
-        .width(camera_width)
-        .height(camera_height)
-        //  .rotation(90)
-        .quality(camera_quality)
-        .takePicture(camera_tmpImage);
+      child_process.exec('./start_camera.sh',
+        function (error, stdout, stderr) {
+          console.log('stdout: ' + stdout);
+          console.log('stderr: ' + stderr);
+          if (error !== null) {
+            console.log('exec error: ' + error);
+          }
+        });
 
       res.writeHead(200, {
         'Content-Type': 'text/html',
@@ -632,13 +655,13 @@ server.on('error', function (e) {
 
 //--------------------------------------------------------------------------------------------------------------
 // start the server
-server.listen(camera_port);
-console.log(pjson.name + " started on port " + camera_port);
-console.log('Visit http://' + localIpAddress + ':' + camera_port + ' to view your PI camera stream');
+server.listen(robot_webserver_port);
+console.log(pjson.name + " started on port " + robot_webserver_port);
+console.log('Visit http://' + localIpAddress + ':' + robot_webserver_port + ' to view your PI camera stream');
 console.log('');
 
 
-var tmpFile = path.resolve(path.join(camera_tmpFolder, camera_tmpImage));
+var tmpFile = path.resolve(path.join("/tmp/stream/", "bob-pic.jpg"));
 
 
 //--------------------------------------------------------------------------------------------------------------
