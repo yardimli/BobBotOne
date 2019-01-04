@@ -1,1 +1,1 @@
-module.exports.ServerSubDomain = "video3";
+module.exports.ServerSubDomain = "micro";

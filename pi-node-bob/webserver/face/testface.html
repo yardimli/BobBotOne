@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Elo Bob Face</title>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+  <script src="js/jquery-3.3.1.min.js"></script>
+  <script src="js/popper.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="icon" type="image/png" href="/webserver/favicon.ico">
+</head>
+
+<body style=" background: lightblue; margin:0px; padding:0px; overflow: hidden;">
+<canvas id="mini_canvas" width="420px" height="420px" style="background: #fff; margin:0px;"></canvas>
+</body>
+
+<script>
+  var mini_canvas = document.getElementById("mini_canvas");
+  var mini_context = mini_canvas.getContext("2d");
+  var DivideMiniScreen = 2.5;
+
+  var bw = window.innerWidth;
+  var bh = window.innerHeight;
+  var p = 0;
+
+  var Highlights = [];
+
+  var PlayAnimationSeq = [];
+  var PlayAnimationRow = 0;
+  var PlayAnimation = false;
+  var PlayAnimationIntCounter = 0;
+
+
+  //---------------------------------------------------------------------------------------------------------------------------
+  function LoadFaceFile(face_name) {
+    $.ajax({
+      url: "faces/" + face_name,
+      dataType: "json",
+      success: function (data, status) {
+        Highlights = data;
+        drawLED();
+        console.log("Status: " + status);
+      },
+      error: function (data, status) {
+        console.log("error Status: " + status);
+      }
+
+    });
+  }
+
+
+  //---------------------------------------------------------------------------------------------------------------------------
+  function drawLED() {
+    var grd;
+
+    $.get("/write_data?q=<Clear_Panel,100,5,,>", function (data, status) {
+      console.log("Data: " + data + "    -- Status: " + status);
+    });
+
+    for (var y = 0; y <= 8 * 40; y += 40) {
+      for (var x = 0; x <= 16 * 40; x += 40) {
+        grd = mini_context.createLinearGradient(0.5 + (x / DivideMiniScreen), 0.5 + (y / DivideMiniScreen), 0.5 + (x / DivideMiniScreen) + (40 / DivideMiniScreen), 0.5 + (y / DivideMiniScreen) + (40 / DivideMiniScreen));
+        grd.addColorStop(0, "#000");
+        grd.addColorStop(1, "#222");
+        mini_context.fillStyle = grd;
+        mini_context.fillRect(0.5 + (x / DivideMiniScreen), 0.5 + (y / DivideMiniScreen), 40 / DivideMiniScreen, 40 / DivideMiniScreen);
+      }
+    }
+
+
+    var ArduinoMsg = "";
+    var ArduinoMsgLen = 0;
+//    console.log(Highlights.length);
+    var IntervalCounter = -1;
+    setInterval(function () {
+      IntervalCounter++;
+      if (IntervalCounter < Highlights.length) {
+        var i = IntervalCounter;
+
+        var DrawColor = "Yellow";
+        if (typeof Highlights[i].Color === "undefined") {
+
+        }
+        else {
+          DrawColor = Highlights[i].Color;
+        }
+
+        ArduinoMsg += "<Set_Pixel," + Highlights[i].X + "," + Highlights[i].Y + "," + DrawColor.toUpperCase() + ",>";
+        $.get("/write_data?q=" + ArduinoMsg, function (data, status) {
+          console.log("Data: " + data + "    -- Status: " + status);
+        });
+        ArduinoMsg = "";
+
+        grd = mini_context.createLinearGradient(
+          0.5 + (Highlights[i].X * (40 / DivideMiniScreen)),
+          0.5 + (Highlights[i].Y * (40 / DivideMiniScreen)),
+          0.5 + (40 / DivideMiniScreen) + (Highlights[i].X * (40 / DivideMiniScreen)),
+          0.5 + (40 / DivideMiniScreen) + (Highlights[i].Y * (40 / DivideMiniScreen)));
+        grd.addColorStop(0, DrawColor);
+        grd.addColorStop(1, DrawColor);
+
+        mini_context.fillStyle = grd;
+        mini_context.fillRect(
+          0.5 + (Highlights[i].X * (40 / DivideMiniScreen)),
+          0.5 + (Highlights[i].Y * (40 / DivideMiniScreen)),
+          (40 / (DivideMiniScreen + 2)),
+          (40 / (DivideMiniScreen + 2)));
+
+      }
+
+    }, 50);
+  }
+
+
+  //---------------------------------------------------------------------------------------------------------------------------
+  $(document).ready(function () {
+    //---------------------------------------------------------------------------------------------------------------------------
+    bw = 40 * 16;//window.innerWidth;
+    bh = 40 * 8;// window.innerHeight;
+    mini_canvas.width = bw / DivideMiniScreen;
+    mini_canvas.height = bh / DivideMiniScreen;
+
+//    LoadFaceFile("face1.txt");
+
+    PlayAnimationSeq = [];
+    PlayAnimationSeq.push({"FileName": "face1", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face2", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face3", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face4", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face5", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face6", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face7", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face8", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face9", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face10", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face11", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face12", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face13", "Delay": 50});
+    PlayAnimationSeq.push({"FileName": "face14", "Delay": 50});
+    PlayAnimationRow = -1;
+    PlayAnimationIntCounter = 0;
+    PlayAnimation = true;
+
+
+    setInterval(function () {
+      if (PlayAnimation && PlayAnimationSeq.length > 0) {
+        PlayAnimationIntCounter++;
+
+        if (PlayAnimationRow == -1) {
+          PlayAnimationRow = 1;
+          PlayAnimationIntCounter = 0;
+        }
+
+        if (PlayAnimationIntCounter > PlayAnimationSeq[PlayAnimationRow - 1]["Delay"]) {
+
+          PlayAnimationRow++;
+          if (PlayAnimationRow > PlayAnimationSeq.length) {
+            PlayAnimationRow = 1;
+          }
+
+          LoadFaceFile(PlayAnimationSeq[PlayAnimationRow - 1]["FileName"] + ".txt");
+          PlayAnimationIntCounter = 0;
+        }
+      }
+    }, 100);
+
+
+  })
+  ;
+</script>

@@ -1,5 +1,0 @@
-
-[Desktop Entry]
-Name = webserver
-Exec = lxterminal -e "/home/pi/SmartRobot/start-webserver.sh"
-Type = applicaton

@@ -70,7 +70,6 @@ int FirstInt = 0;
 int SecondInt = 0;
 
 
-
 //===========================================================================================
 void getDataFromPC() {
   // receive data from PC and save it into inputBuffer
@@ -174,6 +173,20 @@ void loop(void)
 
   if (newDataFromPC) {
     newDataFromPC = false;
+
+    if (strcmp(messageFromPC, "Set_Pixel") == 0) {
+	    PanelColor = 1;
+	    if (strcmp(StringMessage,"QUENCH") == 0) { PanelColor = 0; }
+	    if (strcmp(StringMessage,"RED") == 0) { PanelColor = 1; }
+	    if (strcmp(StringMessage,"GREEN") == 0) { PanelColor = 2; }
+	    if (strcmp(StringMessage,"YELLOW") == 0) { PanelColor = 3; }
+	    if (strcmp(StringMessage,"BLUE") == 0) { PanelColor = 4; }
+	    if (strcmp(StringMessage,"PURPLE") == 0) { PanelColor = 5; }
+	    if (strcmp(StringMessage,"CYAN") == 0) { PanelColor = 6; }
+	    if (strcmp(StringMessage,"WHITE") == 0) { PanelColor = 7; }
+
+		  panel.pixel(FirstInt,SecondInt,PanelColor);
+		} else
 
     if (strcmp(messageFromPC, "Clear_Panel") == 0) {
 			  if (FirstInt==100) {

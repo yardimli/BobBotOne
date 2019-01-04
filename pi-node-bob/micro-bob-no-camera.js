@@ -50,6 +50,15 @@ var boundaryID = "BOUNDARY";
 // var camera_tmpFolder = os.tmpdir();
 // var camera_tmpImage = pjson.name + '-image.jpg';
 
+var dir = '/tmp/stream';
+var tmpFile = path.resolve(path.join("/tmp/stream/", "bob-pic.jpg"));
+
+if (!fs.existsSync(dir)) {
+  fs.mkdirSync(dir);
+}
+
+fs.createReadStream('./camera-lense.jpg').pipe(fs.createWriteStream(tmpFile));
+
 
 var DistanceArray = [];
 
@@ -208,432 +217,456 @@ function openPort() {
 
 openPort();
 
+var StopEngines = true;
+
+setInterval(function () {
+
+  if (StopEngines) {
+    motor_hat.getPWM().setPWM(15, 0, 0);
+    motor_hat.getPWM().setPWM(1, 0, 0);
+
+    FrontLeft.setSpeed(0);
+    FrontLeft.run(Adafruit_MotorHAT.RELEASE);
+
+    FrontRight.setSpeed(0);
+    FrontRight.run(Adafruit_MotorHAT.RELEASE);
+
+    BackLeft.setSpeed(0);
+    BackLeft.run(Adafruit_MotorHAT.RELEASE);
+
+    BackRight.setSpeed(0);
+    BackRight.run(Adafruit_MotorHAT.RELEASE);
+  }
+
+  StopEngines = true;
+}, 1000);
+
 
 /**
  * create a server to serve out the motion jpeg images
  */
 var server = http.createServer(function (req, res) {
 
-    var queryData = url.parse(req.url, true);
+  var queryData = url.parse(req.url, true);
 
-    const xpath = queryData.pathname, query = queryData.query;
-    const method = req.method;
+  const xpath = queryData.pathname, query = queryData.query;
+  const method = req.method;
 
-    log_to_file("Request received on: " + xpath + " method: " + method + " query: " + JSON.stringify(query));
+  log_to_file("Request received on: " + xpath + " method: " + method + " query: " + JSON.stringify(query));
 //  console.log('query: ', query);
 
-    if (req.method === 'OPTIONS') {
-      res.writeHead(200);
-      res.end();
-      return;
-    }
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200);
+    res.end();
+    return;
+  }
 
 
-    var contentType = 'text/html';
+  var contentType = 'text/html';
 
-    //classic web server
-    //--------------------------------------------------------------------------------------------------------------
-    if (xpath.indexOf("/webserver") !== -1) {
-      var filePath = '.' + xpath; // req.url;
+  //classic web server
+  //--------------------------------------------------------------------------------------------------------------
+  if (xpath.indexOf("/webserver") !== -1) {
+    var filePath = '.' + xpath; // req.url;
 //    if (filePath === './webserver') filePath = './webserver/index.html';
 
-      var extname = path.extname(xpath);
-      switch (extname) {
-        case '.js':
-          contentType = 'text/javascript';
-          break;
-        case '.css':
-          contentType = 'text/css';
-          break;
-        case '.json':
-          contentType = 'application/json';
-          break;
-        case '.png':
-          contentType = 'image/png';
-          break;
-        case '.jpg':
-          contentType = 'image/jpg';
-          break;
-        case '.wav':
-          contentType = 'audio/wav';
-          break;
-        case '.ttf':
-          contentType = 'application/x-font-ttf';
-          break;
-        case '.otf':
-          contentType = 'application/x-font-opentype';
-          break;
-        case '.woff':
-          contentType = 'application/font-woff';
-          break;
-        case '.woff2':
-          contentType = 'application/font-woff2';
-          break;
-        case '.eot':
-          contentType = 'application/vnd.ms-fontobject';
-          break;
-        case '.svg':
-          contentType = 'image/svg+xml';
-          break;
-      }
-
-      if (!fs.existsSync(filePath) || (!fs.lstatSync(filePath).isFile())) {
-        log_to_file(filePath + " doesnt exist.");
-        fs.readFile('./404.html', function (error, content) {
-          res.writeHead(200, {'Content-Type': contentType});
-          res.end(content, 'utf-8');
-        });
-      }
-
-      fs.readFile(filePath, function (error, content) {
-        if (error) {
-          if (error.code == 'ENOENT') {
-            log_to_file(filePath + " doesnt exist (2).");
-            fs.readFile('./404.html', function (error, content) {
-              res.writeHead(200, {'Content-Type': contentType});
-              res.end(content, 'utf-8');
-            });
-          }
-          else {
-            log_to_file(filePath + " doesnt exist (3).");
-            res.writeHead(500);
-            res.end('Sorry, check with the site admin for error: ' + error.code + ' ..\n');
-            res.end();
-          }
-        }
-        else {
-          if (contentType === "text/html" || contentType === "text/javascript") {
-            content = content.toString().replace(new RegExp("##MYIP##", 'g'), localIpAddress + ':' + robot_webserver_port);
-          }
-
-          res.writeHead(200, {
-            'Content-Type': contentType,
-            'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-            'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-            'Pragma': 'no-cache',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Request-Method': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS, GET',
-            'Access-Control-Allow-Headers': '*'
-          });
-          res.end(content, 'utf-8');
-        }
-      });
-    }
-    //end classic static web server
-    //--------------------------------------------------------------------------------------------------------------
-
-    //--------------------------------------------------------------------------------------------------------------
-    else if (xpath === "/system.txt") {
-      res.writeHead(200, {
-        'Content-Type': 'text/html;charset=utf-8',
-        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Request-Method': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET',
-        'Access-Control-Allow-Headers': '*'
-      });
-
-      res.write('system check');
-      res.end();
+    var extname = path.extname(xpath);
+    switch (extname) {
+      case '.js':
+        contentType = 'text/javascript';
+        break;
+      case '.css':
+        contentType = 'text/css';
+        break;
+      case '.json':
+        contentType = 'application/json';
+        break;
+      case '.png':
+        contentType = 'image/png';
+        break;
+      case '.jpg':
+        contentType = 'image/jpg';
+        break;
+      case '.wav':
+        contentType = 'audio/wav';
+        break;
+      case '.ttf':
+        contentType = 'application/x-font-ttf';
+        break;
+      case '.otf':
+        contentType = 'application/x-font-opentype';
+        break;
+      case '.woff':
+        contentType = 'application/font-woff';
+        break;
+      case '.woff2':
+        contentType = 'application/font-woff2';
+        break;
+      case '.eot':
+        contentType = 'application/vnd.ms-fontobject';
+        break;
+      case '.svg':
+        contentType = 'image/svg+xml';
+        break;
     }
 
-    //--------------------------------------------------------------------------------------------------------------
-    // return a html page if the user accesses the server directly
-    else if (xpath === "/stream.html") {
-      res.writeHead(200, {
-        'Content-Type': 'text/html;charset=utf-8',
-        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Request-Method': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET',
-        'Access-Control-Allow-Headers': '*'
-      });
-
-      res.write('<!doctype html>');
-      res.write('<html>');
-      res.write('<head><title>' + pjson.name + '</title><meta charset="utf-8" /></head>');
-      res.write('<body>');
-      res.write('<img src="video_stream.jpg" />');
-      res.write('</body>');
-      res.write('</html>');
-      res.end();
-      return;
-    }
-
-    //--------------------------------------------------------------------------------------------------------------
-    else if (xpath === "/serial_reset") {
-      res.writeHead(200, {
-        'Content-Type': 'text/html',
-        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Request-Method': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET',
-        'Access-Control-Allow-Headers': '*'
-      });
-
-      resetPort();
-
-      res.end("Starting serial reset. ");
-      return;
-    }
-
-
-    //--------------------------------------------------------------------------------------------------------------
-    else if (xpath === "/kill_self") {
-      res.writeHead(200, {
-        'Content-Type': 'text/html',
-        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Request-Method': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET',
-        'Access-Control-Allow-Headers': '*'
-      });
-
-      res.end("Starting serial reset. ");
-
-      console.log("reset_me");
-      return;
-    }
-
-    //--------------------------------------------------------------------------------------------------------------
-    else if (xpath === "/write_data") {
-      ArduinoPort.flush(function (err, results) {});
-      ArduinoPort.write(query.q);
-
-      res.writeHead(200, {
-        'Content-Type': 'text/html',
-        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Request-Method': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET',
-        'Access-Control-Allow-Headers': '*'
-      });
-
-      res.end("wrote data");
-      return;
-    }
-
-    //--------------------------------------------------------------------------------------------------------------
-    else if (xpath === "/read_data") {
-      res.writeHead(200, {
-        'Content-Type': 'text/html',
-        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Request-Method': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET',
-        'Access-Control-Allow-Headers': '*'
-      });
-
-      res.end(JSON.stringify(SerialData));
-      SerialData = [];
-      return;
-    }
-
-    //--------------------------------------------------------------------------------------------------------------
-    else if (xpath === "/controls") {
-      res.writeHead(200, {
-        'Content-Type': 'text/html',
-        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Request-Method': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET',
-        'Access-Control-Allow-Headers': '*'
-      });
-
-      if (query.operation === "servo") {
-        if (query.pan_servo === "on") {
-          motor_hat.getPWM().setPWM(15, 0, parseInt(query.pan_servo_pulse));
-        }
-        else if (query.pan_servo === "off") {
-          motor_hat.getPWM().setPWM(15, 0, 0);
-        }
-
-        if (query.tilt_servo === "on") {
-          motor_hat.getPWM().setPWM(1, 0, parseInt(query.tilt_servo_pulse));
-        }
-        else if (query.tilt_servo === "off") {
-
-          motor_hat.getPWM().setPWM(1, 0, 0);
-        }
-
-        res.end(JSON.stringify({result: true, message: "servos updated"}));
-        return;
-      }
-
-      if (query.operation === "motion") {
-
-        if (query.FL === "on") {
-          if (query.FL_dir === "bkw") FrontLeft.run(Adafruit_MotorHAT.BACKWARD);
-          if (query.FL_dir === "fwd") FrontLeft.run(Adafruit_MotorHAT.FORWARD);
-          FrontLeft.setSpeed(query.FL_speed);
-        }
-        else if (query.FL === "off") {
-          FrontLeft.setSpeed(0);
-          FrontLeft.run(Adafruit_MotorHAT.RELEASE);
-        }
-
-        if (query.FR === "on") {
-          if (query.FR_dir === "bkw") FrontRight.run(Adafruit_MotorHAT.FORWARD);
-          if (query.FR_dir === "fwd") FrontRight.run(Adafruit_MotorHAT.BACKWARD);
-          FrontRight.setSpeed(query.FR_speed);
-        }
-        else if (query.FR === "off") {
-          FrontRight.setSpeed(0);
-          FrontRight.run(Adafruit_MotorHAT.RELEASE);
-        }
-
-        if (query.BL === "on") {
-          if (query.BL_dir === "bkw") BackLeft.run(Adafruit_MotorHAT.FORWARD);
-          if (query.BL_dir === "fwd") BackLeft.run(Adafruit_MotorHAT.BACKWARD);
-          BackLeft.setSpeed(query.BL_speed);
-        }
-        else if (query.BL === "off") {
-          BackLeft.setSpeed(0);
-          BackLeft.run(Adafruit_MotorHAT.RELEASE);
-        }
-
-        if (query.BR === "on") {
-          if (query.BR_dir === "bkw") BackRight.run(Adafruit_MotorHAT.BACKWARD);
-          if (query.BR_dir === "fwd") BackRight.run(Adafruit_MotorHAT.FORWARD);
-          BackRight.setSpeed(query.BR_speed);
-        }
-        else if (query.BR === "off") {
-          BackRight.setSpeed(0);
-          BackRight.run(Adafruit_MotorHAT.RELEASE);
-        }
-
-        res.end(JSON.stringify({result: true, message: "motors updated"}));
-        return;
-      }
-    }
-
-    //--------------------------------------------------------------------------------------------------------------
-    else if (xpath === "/stop_camera") {
-
-      child_process.exec('./stop_camera.sh',
-        function (error, stdout, stderr) {
-          console.log('stdout: ' + stdout);
-          console.log('stderr: ' + stderr);
-          if (error !== null) {
-            console.log('exec error: ' + error);
-          }
-        });
-
-      res.writeHead(200, {
-        'Content-Type': 'text/html',
-        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Request-Method': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET',
-        'Access-Control-Allow-Headers': '*'
-      });
-
-      res.end("stopped camera");
-      return;
-    }
-
-
-    //--------------------------------------------------------------------------------------------------------------
-    else if (xpath === "/start_camera") {
-
-      child_process.exec('./start_camera.sh',
-        function (error, stdout, stderr) {
-          console.log('stdout: ' + stdout);
-          console.log('stderr: ' + stderr);
-          if (error !== null) {
-            console.log('exec error: ' + error);
-          }
-        });
-
-      res.writeHead(200, {
-        'Content-Type': 'text/html',
-        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Request-Method': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET',
-        'Access-Control-Allow-Headers': '*'
-      });
-
-      res.end("started camera");
-      return;
-    }
-
-    //--------------------------------------------------------------------------------------------------------------
-    else if (xpath === "/health_check") {
-      res.statusCode = 200;
-      res.end();
-      return;
-    }
-
-    //--------------------------------------------------------------------------------------------------------------
-    // for image requests, return a HTTP multipart document (stream)
-    else if (xpath === "/video_stream.jpg") {
-
-      res.writeHead(200, {
-        'Content-Type': 'multipart/x-mixed-replace;boundary="' + boundaryID + '"',
-        'Connection': 'keep-alive',
-        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Request-Method': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET',
-        'Access-Control-Allow-Headers': '*'
-      });
-
-
-      // send new frame to client
-      var subscriber_token = PubSub.subscribe('MJPEG', function (msg, data) {
-
-        //console.log('sending image');
-
-        res.write('--' + boundaryID + '\r\n')
-        res.write('Content-Type: image/jpeg\r\n');
-        res.write('Content-Length: ' + data.length + '\r\n');
-        res.write("\r\n");
-        res.write(Buffer.from(data), 'binary');
-        res.write("\r\n");
-      });
-
-      //--------------------------------------------------------------------------------------------------------------
-      // connection is closed when the browser terminates the request
-      res.on('close', function () {
-        log_to_file("Connection closed!");
-//      console.log("Connection closed!");
-        PubSub.unsubscribe(subscriber_token);
-        res.end();
-      });
-    }
-    else {
-      log_to_file(xpath + " doesnt exist (4).");
-//    console.log(xpath + " doesnt exist.");
+    if (!fs.existsSync(filePath) || (!fs.lstatSync(filePath).isFile())) {
+      log_to_file(filePath + " doesnt exist.");
       fs.readFile('./404.html', function (error, content) {
         res.writeHead(200, {'Content-Type': contentType});
         res.end(content, 'utf-8');
       });
     }
+
+    fs.readFile(filePath, function (error, content) {
+      if (error) {
+        if (error.code == 'ENOENT') {
+          log_to_file(filePath + " doesnt exist (2).");
+          fs.readFile('./404.html', function (error, content) {
+            res.writeHead(200, {'Content-Type': contentType});
+            res.end(content, 'utf-8');
+          });
+        }
+        else {
+          log_to_file(filePath + " doesnt exist (3).");
+          res.writeHead(500);
+          res.end('Sorry, check with the site admin for error: ' + error.code + ' ..\n');
+          res.end();
+        }
+      }
+      else {
+        if (contentType === "text/html" || contentType === "text/javascript") {
+          content = content.toString().replace(new RegExp("##MYIP##", 'g'), localIpAddress + ':' + robot_webserver_port);
+        }
+
+        res.writeHead(200, {
+          'Content-Type': contentType,
+          'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+          'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+          'Pragma': 'no-cache',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Request-Method': '*',
+          'Access-Control-Allow-Methods': 'OPTIONS, GET',
+          'Access-Control-Allow-Headers': '*'
+        });
+        res.end(content, 'utf-8');
+      }
+    });
   }
-  )
-;
+  //end classic static web server
+  //--------------------------------------------------------------------------------------------------------------
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/system.txt") {
+    res.writeHead(200, {
+      'Content-Type': 'text/html;charset=utf-8',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+
+    res.write('system check');
+    res.end();
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  // return a html page if the user accesses the server directly
+  else if (xpath === "/stream.html") {
+    res.writeHead(200, {
+      'Content-Type': 'text/html;charset=utf-8',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+
+    res.write('<!doctype html>');
+    res.write('<html>');
+    res.write('<head><title>' + pjson.name + '</title><meta charset="utf-8" /></head>');
+    res.write('<body>');
+    res.write('<img src="video_stream.jpg" />');
+    res.write('</body>');
+    res.write('</html>');
+    res.end();
+    return;
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/serial_reset") {
+    res.writeHead(200, {
+      'Content-Type': 'text/html',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+
+    resetPort();
+
+    res.end("Starting serial reset. ");
+    return;
+  }
+
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/kill_self") {
+    res.writeHead(200, {
+      'Content-Type': 'text/html',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+
+    res.end("Starting serial reset. ");
+
+    console.log("reset_me");
+    return;
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/write_data") {
+    ArduinoPort.flush(function (err, results) {});
+    ArduinoPort.write(query.q);
+
+    res.writeHead(200, {
+      'Content-Type': 'text/html',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+
+    res.end("wrote data");
+    return;
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/read_data") {
+    res.writeHead(200, {
+      'Content-Type': 'text/html',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+
+    res.end(JSON.stringify(SerialData));
+    SerialData = [];
+    return;
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/controls") {
+    res.writeHead(200, {
+      'Content-Type': 'text/html',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+
+    if (query.operation === "servo") {
+      StopEngines = false;
+      if (query.pan_servo === "on") {
+        motor_hat.getPWM().setPWM(15, 0, parseInt(query.pan_servo_pulse));
+      }
+      else if (query.pan_servo === "off") {
+        motor_hat.getPWM().setPWM(15, 0, 0);
+      }
+
+      if (query.tilt_servo === "on") {
+        motor_hat.getPWM().setPWM(1, 0, parseInt(query.tilt_servo_pulse));
+      }
+      else if (query.tilt_servo === "off") {
+
+        motor_hat.getPWM().setPWM(1, 0, 0);
+      }
+
+      res.end(JSON.stringify({result: true, message: "servos updated"}));
+      return;
+    }
+
+    if (query.operation === "motion") {
+      StopEngines = false;
+
+      if (query.FL === "on") {
+        if (query.FL_dir === "bkw") FrontLeft.run(Adafruit_MotorHAT.BACKWARD);
+        if (query.FL_dir === "fwd") FrontLeft.run(Adafruit_MotorHAT.FORWARD);
+        FrontLeft.setSpeed(query.FL_speed);
+      }
+      else if (query.FL === "off") {
+        FrontLeft.setSpeed(0);
+        FrontLeft.run(Adafruit_MotorHAT.RELEASE);
+      }
+
+      if (query.FR === "on") {
+        if (query.FR_dir === "bkw") FrontRight.run(Adafruit_MotorHAT.FORWARD);
+        if (query.FR_dir === "fwd") FrontRight.run(Adafruit_MotorHAT.BACKWARD);
+        FrontRight.setSpeed(query.FR_speed);
+      }
+      else if (query.FR === "off") {
+        FrontRight.setSpeed(0);
+        FrontRight.run(Adafruit_MotorHAT.RELEASE);
+      }
+
+      if (query.BL === "on") {
+        if (query.BL_dir === "bkw") BackLeft.run(Adafruit_MotorHAT.FORWARD);
+        if (query.BL_dir === "fwd") BackLeft.run(Adafruit_MotorHAT.BACKWARD);
+        BackLeft.setSpeed(query.BL_speed);
+      }
+      else if (query.BL === "off") {
+        BackLeft.setSpeed(0);
+        BackLeft.run(Adafruit_MotorHAT.RELEASE);
+      }
+
+      if (query.BR === "on") {
+        if (query.BR_dir === "bkw") BackRight.run(Adafruit_MotorHAT.BACKWARD);
+        if (query.BR_dir === "fwd") BackRight.run(Adafruit_MotorHAT.FORWARD);
+        BackRight.setSpeed(query.BR_speed);
+      }
+      else if (query.BR === "off") {
+        BackRight.setSpeed(0);
+        BackRight.run(Adafruit_MotorHAT.RELEASE);
+      }
+
+      res.end(JSON.stringify({result: true, message: "motors updated"}));
+      return;
+    }
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/stop_camera") {
+
+    child_process.exec('./stop_camera.sh',
+      function (error, stdout, stderr) {
+        console.log('stdout: ' + stdout);
+        console.log('stderr: ' + stderr);
+        if (error !== null) {
+          console.log('exec error: ' + error);
+        }
+      });
+
+    res.writeHead(200, {
+      'Content-Type': 'text/html',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+
+    res.end("stopped camera");
+    return;
+  }
+
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/start_camera") {
+
+    child_process.exec('./start_camera.sh',
+      function (error, stdout, stderr) {
+        console.log('stdout: ' + stdout);
+        console.log('stderr: ' + stderr);
+        if (error !== null) {
+          console.log('exec error: ' + error);
+        }
+      });
+
+    res.writeHead(200, {
+      'Content-Type': 'text/html',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+
+    res.end("started camera");
+    return;
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/health_check") {
+    res.statusCode = 200;
+    res.end();
+    return;
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  // for image requests, return a HTTP multipart document (stream)
+  else if (xpath === "/video_stream.jpg") {
+
+    res.writeHead(200, {
+      'Content-Type': 'multipart/x-mixed-replace;boundary="' + boundaryID + '"',
+      'Connection': 'keep-alive',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+
+
+    // send new frame to client
+    var subscriber_token = PubSub.subscribe('MJPEG', function (msg, data) {
+
+      //console.log('sending image');
+
+      res.write('--' + boundaryID + '\r\n')
+      res.write('Content-Type: image/jpeg\r\n');
+      res.write('Content-Length: ' + data.length + '\r\n');
+      res.write("\r\n");
+      res.write(Buffer.from(data), 'binary');
+      res.write("\r\n");
+    });
+
+    //--------------------------------------------------------------------------------------------------------------
+    // connection is closed when the browser terminates the request
+    res.on('close', function () {
+      log_to_file("Connection closed!");
+//      console.log("Connection closed!");
+      PubSub.unsubscribe(subscriber_token);
+      res.end();
+    });
+  }
+  else {
+    log_to_file(xpath + " doesnt exist (4).");
+//    console.log(xpath + " doesnt exist.");
+    fs.readFile('./404.html', function (error, content) {
+      res.writeHead(200, {'Content-Type': contentType});
+      res.end(content, 'utf-8');
+    });
+  }
+});
 
 //--------------------------------------------------------------------------------------------------------------
 server.on('error', function (e) {
@@ -659,9 +692,6 @@ server.listen(robot_webserver_port);
 console.log(pjson.name + " started on port " + robot_webserver_port);
 console.log('Visit http://' + localIpAddress + ':' + robot_webserver_port + ' to view your PI camera stream');
 console.log('');
-
-
-var tmpFile = path.resolve(path.join("/tmp/stream/", "bob-pic.jpg"));
 
 
 //--------------------------------------------------------------------------------------------------------------

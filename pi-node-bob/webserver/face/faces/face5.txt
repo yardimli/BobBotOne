@@ -1,0 +1,1 @@
+[{"X":9,"Y":5,"Color":"Red"},{"X":8,"Y":6,"Color":"Red"},{"X":7,"Y":6,"Color":"Red"},{"X":6,"Y":5,"Color":"Red"},{"X":3,"Y":2,"Color":"Purple"},{"X":4,"Y":2,"Color":"Purple"},{"X":2,"Y":3,"Color":"Purple"},{"X":5,"Y":3,"Color":"Purple"},{"X":10,"Y":3,"Color":"Purple"},{"X":11,"Y":2,"Color":"Purple"},{"X":12,"Y":2,"Color":"Purple"},{"X":13,"Y":3,"Color":"Purple"}]

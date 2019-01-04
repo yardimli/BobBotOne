@@ -27,9 +27,9 @@ function log_to_file(logstr) {
   });
 }
 
+
 log_to_file("===================================================================");
 log_to_file("starting server-micro.js");
-
 
 
 function startSerialControl() {
@@ -80,7 +80,10 @@ function killSerialControl() {
 }
 
 
-startSerialControl();
+//delay start for 20 sec
+setTimeout(function () {
+  startSerialControl();
+}, 20000);
 
 var done_running = false;
 

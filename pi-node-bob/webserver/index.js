@@ -24,7 +24,7 @@ var front_right_revs_array = [];
 var rear_left_revs_array = [];
 var rear_right_revs_array = [];
 
-var life_counter_array = [];
+var runtime_count_array = [];
 var floor_sensor_left_array = [];
 var floor_sensor_right_array = [];
 var distance_sensor_array = [];
@@ -203,7 +203,7 @@ function GetStatus() {
                 datajson["us"] = 200;
               }
 
-              $("#life_counter").html(datajson["c"]);
+              $("#runtime_count").html(datajson["c"]);
               datajson["c"] = parseInt(datajson["c"]);
               datajson["c"] = datajson["c"] % 2;
 
@@ -212,7 +212,7 @@ function GetStatus() {
               rear_left_revs_array.push(datajson["ble"]);
               rear_right_revs_array.push(datajson["bre"]);
 
-              life_counter_array.push(datajson["c"]);
+              runtime_count_array.push(datajson["c"]);
               floor_sensor_left_array.push(datajson["lh"]);
               floor_sensor_right_array.push(datajson["rh"]);
               distance_sensor_array.push(datajson["us"]);
@@ -229,8 +229,8 @@ function GetStatus() {
               if (rear_right_revs_array.length > 12) {
                 rear_right_revs_array.shift();
               }
-              if (life_counter_array.length > 12) {
-                life_counter_array.shift();
+              if (runtime_count_array.length > 12) {
+                runtime_count_array.shift();
               }
               if (floor_sensor_left_array.length > 12) {
                 floor_sensor_left_array.shift();
@@ -246,7 +246,7 @@ function GetStatus() {
               $("#front_right_revs_array").html(front_right_revs_array.join());
               $("#rear_left_revs_array").html(rear_left_revs_array.join());
               $("#rear_right_revs_array").html(rear_right_revs_array.join());
-              $("#life_counter_array").html(life_counter_array.join());
+              $("#runtime_count_array").html(runtime_count_array.join());
               $("#floor_sensor_left_array").html(floor_sensor_left_array.join());
               $("#floor_sensor_right_array").html(floor_sensor_right_array.join());
               $("#distance_sensor_array").html(distance_sensor_array.join());
@@ -289,7 +289,7 @@ function GetStatus() {
                 padding: 0.2
               });
 
-              $('#life_counter_array').peity('bar', {
+              $('#runtime_count_array').peity('bar', {
                 height: 10,
                 fill: ['rgba(255,255,255,0.85)'],
                 width: 65,
