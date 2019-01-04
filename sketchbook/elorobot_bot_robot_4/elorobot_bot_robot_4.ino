@@ -174,16 +174,16 @@ void loop(void)
   if (newDataFromPC) {
     newDataFromPC = false;
 
-    if (strcmp(messageFromPC, "Set_Pixel") == 0) {
+    if (strcmp(messageFromPC, "Pix") == 0) {
 	    PanelColor = 1;
-	    if (strcmp(StringMessage,"QUENCH") == 0) { PanelColor = 0; }
-	    if (strcmp(StringMessage,"RED") == 0) { PanelColor = 1; }
-	    if (strcmp(StringMessage,"GREEN") == 0) { PanelColor = 2; }
-	    if (strcmp(StringMessage,"YELLOW") == 0) { PanelColor = 3; }
-	    if (strcmp(StringMessage,"BLUE") == 0) { PanelColor = 4; }
-	    if (strcmp(StringMessage,"PURPLE") == 0) { PanelColor = 5; }
-	    if (strcmp(StringMessage,"CYAN") == 0) { PanelColor = 6; }
-	    if (strcmp(StringMessage,"WHITE") == 0) { PanelColor = 7; }
+	    if (strcmp(StringMessage,"Q") == 0) { PanelColor = 0; }
+	    if (strcmp(StringMessage,"R") == 0) { PanelColor = 1; }
+	    if (strcmp(StringMessage,"G") == 0) { PanelColor = 2; }
+	    if (strcmp(StringMessage,"Y") == 0) { PanelColor = 3; }
+	    if (strcmp(StringMessage,"B") == 0) { PanelColor = 4; }
+	    if (strcmp(StringMessage,"P") == 0) { PanelColor = 5; }
+	    if (strcmp(StringMessage,"C") == 0) { PanelColor = 6; }
+	    if (strcmp(StringMessage,"W") == 0) { PanelColor = 7; }
 
 		  panel.pixel(FirstInt,SecondInt,PanelColor);
 		} else

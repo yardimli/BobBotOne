@@ -437,6 +437,232 @@ var server = http.createServer(function (req, res) {
     return;
   }
 
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/save_face") {
+    var face_filename = './webserver/face/faces/' + query.face_name + '.txt';
+    fs.writeFile(face_filename, query.highlight, function (err) {
+      if (err) {
+//      console.log(err);
+      }
+      else {
+      }
+    });
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+    res.statusCode = 200;
+    res.end(JSON.stringify({result: "file saved"}));
+    return;
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/save_face_animation") {
+    var face_filename = './webserver/face/faces/animation_' + query.face_animation_name + '.txt';
+    fs.writeFile(face_filename, query.animation_cmd, function (err) {
+      if (err) {
+//      console.log(err);
+      }
+      else {
+      }
+    });
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+    res.statusCode = 200;
+    res.end(JSON.stringify({result: "file saved"}));
+    return;
+  }
+
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/load_faces") {
+
+    var startPath = "./webserver/face/faces";
+    var filter = ".txt";
+
+    if (!fs.existsSync(startPath)) {
+      return;
+    }
+
+    var FileList = [];
+    var files = fs.readdirSync(startPath);
+    for (var i = 0; i < files.length; i++) {
+      var filename = path.join(startPath, files[i]);
+      var stat = fs.lstatSync(filename);
+      if (stat.isDirectory()) {
+      }
+      else if ((filename.indexOf(filter) >= 0) && (filename.indexOf("animation") === -1)) {
+        FileList.push(files[i]);
+//          console.log('-- found: ', filename);
+      }
+    }
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+    res.statusCode = 200;
+    res.end(JSON.stringify(FileList), 'utf-8');
+    return;
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/load_face_animations") {
+
+    var startPath = "./webserver/face/faces";
+    var filter = ".txt";
+
+    if (!fs.existsSync(startPath)) {
+      return;
+    }
+
+    var FileList = [];
+    var files = fs.readdirSync(startPath);
+    for (var i = 0; i < files.length; i++) {
+      var filename = path.join(startPath, files[i]);
+      var stat = fs.lstatSync(filename);
+      if (stat.isDirectory()) {
+      }
+      else if ((filename.indexOf(filter) >= 0) && (filename.indexOf("animation") >= 0)) {
+        FileList.push(files[i]);
+//          console.log('-- found: ', filename);
+      }
+    }
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+    res.statusCode = 200;
+    res.end(JSON.stringify(FileList), 'utf-8');
+    return;
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/load_face") {
+
+    var face_filename = './webserver/face/faces/' + query.face_name;
+    fs.readFile(face_filename, function (error, content) {
+
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Request-Method': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET',
+        'Access-Control-Allow-Headers': '*'
+      });
+      res.statusCode = 200;
+      res.end(content, 'utf-8');
+    });
+    return;
+  }
+
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/load_face_animation") {
+
+    var face_filename = './webserver/face/faces/' + query.face_animation_name;
+    fs.readFile(face_filename, function (error, content) {
+
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Request-Method': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET',
+        'Access-Control-Allow-Headers': '*'
+      });
+      res.statusCode = 200;
+      res.end(content, 'utf-8');
+    });
+    return;
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  else if (xpath === "/set_face") {
+
+    var ArduinoMsg = "";
+    var face_json = [];
+    try {
+      face_json = JSON.parse(fs.readFileSync('webserver/face/faces/' + query.face_name + '.txt', 'utf8'));
+
+      ArduinoPort.flush(function (err, results) {});
+      ArduinoPort.write("<Clear_Panel,100,5,,>");
+
+      for (var i = 0; i < face_json.length; i++) {
+
+        setTimeout(function (i) {
+
+          var DrawColor = face_json[i].Color;
+
+          if (typeof DrawColor === "undefined") {
+            DrawColor = "R";
+          }
+          else {
+            DrawColor = DrawColor.charAt(0);
+            DrawColor = DrawColor.toUpperCase();
+          }
+          ArduinoMsg += "<Pix," + face_json[i].X + "," + face_json[i].Y + "," + DrawColor + ",>";
+          ArduinoPort.write("<Pix," + face_json[i].X + "," + face_json[i].Y + "," + DrawColor + ",>");
+        }, 30 * i,i);
+
+      }
+
+
+    } catch (e) {
+      console.log(e);
+      face_json = [{"error": "reading/parsing error"}];
+    }
+
+    res.writeHead(200, {
+      'Content-Type': 'text/html',
+      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Request-Method': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET',
+      'Access-Control-Allow-Headers': '*'
+    });
+
+    res.end("got face" + JSON.stringify(face_json) + " Sent to arduino: " + ArduinoMsg);
+    return;
+  }
+
   //--------------------------------------------------------------------------------------------------------------
   else if (xpath === "/write_data") {
     ArduinoPort.flush(function (err, results) {});

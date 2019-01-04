@@ -80,10 +80,10 @@ function killSerialControl() {
 }
 
 
-//delay start for 20 sec
+//delay start for 2 sec
 setTimeout(function () {
   startSerialControl();
-}, 20000);
+}, 2000);
 
 var done_running = false;
 

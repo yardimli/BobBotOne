@@ -77,7 +77,7 @@
       if (IntervalCounter < Highlights.length) {
         var i = IntervalCounter;
 
-        var DrawColor = "Yellow";
+        var DrawColor = "Y";
         if (typeof Highlights[i].Color === "undefined") {
 
         }
@@ -85,7 +85,7 @@
           DrawColor = Highlights[i].Color;
         }
 
-        ArduinoMsg += "<Set_Pixel," + Highlights[i].X + "," + Highlights[i].Y + "," + DrawColor.toUpperCase() + ",>";
+        ArduinoMsg += "<Pix," + Highlights[i].X + "," + Highlights[i].Y + "," + DrawColor.toUpperCase() + ",>";
         $.get("/write_data?q=" + ArduinoMsg, function (data, status) {
           console.log("Data: " + data + "    -- Status: " + status);
         });
