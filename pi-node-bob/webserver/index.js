@@ -1,22 +1,22 @@
 var hostname = "/";
 if (location.hostname === "localhost" || location.hostname === "local.elosoft.tw" || location.hostname === "127.0.0.1") {
-  // $("#stream_container").attr("src", "http://192.168.1.125:8080/video_stream.jpg?time=1&pDelay=120000");
-  hostname = "http://192.168.1.125:8080/";
+  hostname = "http://192.168.1.124/";
 }
 else {
-  // $("#stream_container").attr("src", "/video_stream.jpg?time=1&pDelay=120000");
   hostname = "/";
 }
 
-var backgroundCheck;
-var LastStatusCheck = null;
-var BigPictureTimeout = null;
-var StatusTimeout = [];
-var LastBigPicture = "";
+var lastStatusCheck = null;
 
-var LastLeftSpeed = 0;
-var LastRightSpeed = 0;
-var SendMotorsOffSignal = 0;
+var lastLeftSpeed = 0;
+var lastRightSpeed = 0;
+
+var RobotSpeed = 0;
+
+var Left_Direction = "fwd";
+var Right_Direction = "fwd";
+var Left_Speed = 0;
+var Right_Speed = 0;
 
 
 var front_left_revs_array = [];
@@ -29,8 +29,16 @@ var floor_sensor_left_array = [];
 var floor_sensor_right_array = [];
 var distance_sensor_array = [];
 
+var lastHeadTiltPosition = 0;
+var headTiltPosition = 0;
 
-var CameraStopTimeout;
+var lastHeadPanPosition = 0;
+var headPanPosition = 0;
+var servoCommandTimer = 0;
+
+
+var cameraStopTimeout;
+
 function checkTime(i) {
   if (i < 10) {
     i = "0" + i
@@ -45,8 +53,6 @@ var img;
 var canvas;
 var context;
 
-var StatusType = 0;
-var StatusRow = 0;
 var CameraRunning = false;
 
 
@@ -119,40 +125,49 @@ function resolveToPoint(rad, diameter) {
 }
 
 
-function GetTime() {
+function getTime() {
   var today = new Date();
   var h = today.getHours();
   var m = today.getMinutes();
   var s = today.getSeconds();
-  m = checkTime(m);
-  s = checkTime(s);
-  return h + ":" + m + ":" + s;
+
+  $("#clockplace").html(h + ":" + checkTime(m) + ":" + checkTime(s));
 }
 
 
-function startCamera() {
-  let UrlToGet = hostname + "start_camera";
+function startCamera(sendStart) {
+  let urlToGet = hostname + "robot_cmd?start_camera=yes";
 
   if (!CameraRunning) {
     CameraRunning = true;
-    $.get(UrlToGet, function (data, status) {
-      console.log("Data: " + data + "    -- Status: " + status);
+    if (sendStart) {
+      $.get(urlToGet, function (data, status) {
+        console.log("Data: " + data + "    -- Status: " + status);
 
+        if (location.hostname === "localhost" || location.hostname === "local.elosoft.tw" || location.hostname === "127.0.0.1") {
+          $("#stream_container").attr("src", "http://192.168.1.124/video_stream.jpg?time=1&pDelay=120000");
+        }
+        else {
+          $("#stream_container").attr("src", "/video_stream.jpg?time=1&pDelay=120000");
+        }
+      });
+    } else
+    {
       if (location.hostname === "localhost" || location.hostname === "local.elosoft.tw" || location.hostname === "127.0.0.1") {
-        $("#stream_container").attr("src", "http://192.168.1.125:8080/video_stream.jpg?time=1&pDelay=120000");
+        $("#stream_container").attr("src", "http://192.168.1.124/video_stream.jpg?time=1&pDelay=120000");
       }
       else {
         $("#stream_container").attr("src", "/video_stream.jpg?time=1&pDelay=120000");
       }
-    });
+    }
   }
 
 
-  clearTimeout(CameraStopTimeout);
+  clearTimeout(cameraStopTimeout);
 
-  CameraStopTimeout = setTimeout(function () {
-    let UrlToGet = hostname + "stop_camera";
-    $.get(UrlToGet, function (data, status) {
+  cameraStopTimeout = setTimeout(function () {
+    let urlToGet = hostname + "robot_cmd?stop_camera=yes";
+    $.get(urlToGet, function (data, status) {
       CameraRunning = false;
       console.log("Data: " + data + "    -- Status: " + status);
     });
@@ -160,46 +175,38 @@ function startCamera() {
 
 }
 
-function GetStatus() {
+var statusType=1;
 
-  if (StatusType == 0) {
-    StatusType = 1;
-  }
-  else {
-    StatusType = 0;
-  }
+function getStatus() {
 
-  if (StatusType == 1) {
-    var QData = "<Get_Data,0,0,msg>";
-    var UrlToGet = hostname + "write_data?q=" + QData;
-    $.get(UrlToGet, function (data, status) {
+
+  if (statusType === 1) {
+    var qData = "<Get_Data,0,0,msg>";
+    var urlToGet = hostname + "robot_cmd?write_data=yes&q=" + qData;
+    $.get(urlToGet, function (data, status) {
       //console.log("Data: " + data + "    -- Status: " + status);
     });
-  }
+    statusType = 0;
+  } else
 
-  if (StatusType == 0) {
-    var UrlToGet = hostname + "read_data";
+  if (statusType === 0) {
+    statusType = 1;
+    var urlToGet = hostname + "robot_cmd?read_data=yes";
     var data = {};
 
     $.ajax({
-      url: UrlToGet,
+      url: urlToGet,
       data: data,
       success: function (data, status) {
-        if (status == "success" && data.length > 0) {
+        if (status === "success" && data.length > 0) {
           //console.log("Status: " + status);
 //        console.log(data);
 
 
-          $.each(data, function (key, value) {
-            key = key + 0;
-            StatusRow++;
-            if (StatusRow > 2) {
-              StatusRow = 0;
-            }
-
+          $.each(data[0].SerialData, function (key, value) {
             try {
               var datajson = JSON.parse(value.data);
-              if (parseInt(datajson["us"]) < 10) {
+              if (parseInt(datajson["us"]) < 1) {
                 datajson["us"] = 200;
               }
 
@@ -324,12 +331,30 @@ function GetStatus() {
           });
         }
 
-        LastStatusCheck = data;
+        lastStatusCheck = data;
       },
       dataType: "json"
     });
   }
 }
+
+var motionCommandCache = "";
+var motionTimeout = 10;
+
+function sendMotorCommand() {
+  motionTimeout--;
+  if (motionTimeout<1) {motionCommandCache="";}
+  if (motionCommandCache!=="") {
+    var urlToGet = hostname + "robot_cmd?controls=yes&" + motionCommandCache;
+    $.get(urlToGet, function (data, status) {
+      console.log("Data: " + data + "    -- Status: " + status);
+    });
+  }
+}
+
+setInterval(function () {
+  sendMotorCommand();
+}, 500);
 
 $(document).ready(function () {
   canvas = document.getElementById("image_process_canvas");
@@ -342,82 +367,69 @@ $(document).ready(function () {
   });
   head_joystick_control_div.on('start end', function (evt, data) {
     if (evt.type === "end") {
-      var QData = "operation=servo&pan_servo=off&tilt_servo=off";
-      var UrlToGet = hostname + "controls?" + QData;
+      var qData = "servo=yes&pan_servo=off&tilt_servo=off";
+      var urlToGet = hostname + "robot_cmd?controls=yes&" + qData;
 
-      $.get(UrlToGet, function (data, status) {
+      $.get(urlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
     }
   });
 
   head_joystick_control_div.on('hidden', function (evt, data) {
-    var QData = "operation=servo&pan_servo=off&tilt_servo=off";
-    var UrlToGet = hostname + "controls?" + QData;
+    var qData = "servo=yes&pan_servo=off&tilt_servo=off";
+    var urlToGet = hostname + "robot_cmd?controls=yes&" + qData;
 
-    $.get(UrlToGet, function (data, status) {
+    $.get(urlToGet, function (data, status) {
       console.log("Data: " + data + "    -- Status: " + status);
     });
   });
 
-  var LastHeadTiltPositon = 0;
-  var HeadTiltPosition = 0;
-
-  var LastHeadPanPositon = 0;
-  var HeadPanPosition = 0;
-  var ServoCommanTimer = 0;
 
   head_joystick_control_div.on('move', function (evt, data) {
 
     if (typeof data.angle.radian !== "undefined") {
-      var QData = "";
+      var qData = "";
       var XYSpeed = resolveToPoint(data.angle.radian, data.distance * 2);
 
       if (XYSpeed.mX > 0) {
-        HeadTiltPosition = 460 - (XYSpeed.mX * 2);
+        headTiltPosition = 460 - (XYSpeed.mX * 2);
       }
 
       if (XYSpeed.mX < 0) {
-        HeadTiltPosition = 460 - (XYSpeed.mX * 2);
+        headTiltPosition = 460 - (XYSpeed.mX * 2);
       }
 
       if (XYSpeed.mY > 0) {
-        HeadPanPosition = 420 + (XYSpeed.mY * 1);
+        headPanPosition = 420 + (XYSpeed.mY * 1);
       }
 
       if (XYSpeed.mY < 0) {
-        HeadPanPosition = 420 + (XYSpeed.mY * 1);
+        headPanPosition = 420 + (XYSpeed.mY * 1);
       }
 
-      HeadPanPosition = Math.round(HeadPanPosition);
-      HeadTiltPosition = Math.round(HeadTiltPosition);
+      headPanPosition = Math.round(headPanPosition);
+      headTiltPosition = Math.round(headTiltPosition);
 
-      if (HeadPanPosition !== LastHeadPanPositon || HeadTiltPosition !== LastHeadTiltPositon) {
-        LastHeadPanPositon = HeadPanPosition;
-        LastHeadTiltPositon = HeadTiltPosition;
+      if (headPanPosition !== lastHeadPanPosition || headTiltPosition !== lastHeadTiltPosition) {
+        lastHeadPanPosition = headPanPosition;
+        lastHeadTiltPosition = headTiltPosition;
 
-        clearTimeout(ServoCommanTimer);
+        clearTimeout(servoCommandTimer);
 
-        ServoCommanTimer = setTimeout(function () {
+        servoCommandTimer = setTimeout(function () {
 
-          var QData = "operation=servo&pan_servo=on&pan_servo_pulse=" + LastHeadPanPositon + "&tilt_servo=on&tilt_servo_pulse=" + LastHeadTiltPositon;
+          var qData = "servo=yes&pan_servo=on&pan_servo_pulse=" + lastHeadPanPosition + "&tilt_servo=on&tilt_servo_pulse=" + lastHeadTiltPosition;
 
-          startCamera();
-          var UrlToGet = hostname + "controls?" + QData;
-          console.log(UrlToGet);
-          $.get(UrlToGet, function (data, status) {
+          var urlToGet = hostname + "robot_cmd?start_camera=yes&controls=yes&" + qData + "&write_data=yes&q=<Set_Face,1,18,>";
+          console.log(urlToGet);
+          $.get(urlToGet, function (data, status) {
+            startCamera(false);
             console.log("Data: " + data + "    -- Status: " + status);
-
-            var UrlToGet = hostname + "write_data?q=<Set_Face,1,18,>";
-            $.get(UrlToGet, function (data, status) {
-              console.log("Data: " + data + "    -- Status: " + status);
-            });
           });
         }, 50);
       }
-
     }
-
   });
 
 
@@ -428,10 +440,11 @@ $(document).ready(function () {
   });
 
   motor_joystick_control_div.on('hidden', function (evt, data) {
-    var QData = "operation=motion&FL=off&FR=off&BL=off&BR=off";
-    var UrlToGet = hostname + "controls?" + QData;
+    var qData = "motion=yes&FL=off&FR=off&BL=off&BR=off";
+    var urlToGet = hostname + "robot_cmd?controls=yes&" + qData;
+    motionCommandCache = "";
 
-    $.get(UrlToGet, function (data, status) {
+    $.get(urlToGet, function (data, status) {
       console.log("Data: " + data + "    -- Status: " + status);
     });
   });
@@ -442,22 +455,17 @@ $(document).ready(function () {
 //    console.log(data);
 
     if (evt.type === "end") {
-      var QData = "operation=motion&FL=off&FR=off&BL=off&BR=off";
-      var UrlToGet = hostname + "controls?" + QData;
+      motionCommandCache = "";
+      var qData = "motion=yes&FL=off&FR=off&BL=off&BR=off";
+      var urlToGet = hostname + "robot_cmd?controls=yes&" + qData + "&write_data=yes&q=<Set_Face,1,3,>";
 
-      $.get(UrlToGet, function (data, status) {
+      $.get(urlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
-
-        var UrlToGet = hostname + "write_data?q=<Set_Face,1,3,>";
-        $.get(UrlToGet, function (data, status) {
-          console.log("Data: " + data + "    -- Status: " + status);
-        });
-
       });
     }
     else {
-      var UrlToGet = hostname + "write_data?q=<Set_Face,1,6,>";
-      $.get(UrlToGet, function (data, status) {
+      var urlToGet = hostname + "robot_cmd?write_data=yes&q=<Set_Face,1,6,>";
+      $.get(urlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
     }
@@ -474,18 +482,11 @@ $(document).ready(function () {
     //180 to 90 == left to forward
 
     if (typeof data.angle.radian !== "undefined") {
-      var QData = "";
+      var qData = "";
       var XYSpeed = resolveToPoint(data.angle.radian, data.distance * 2);
 //      console.log(data.angle.radian);
 //      console.log(resolveToPoint(data.angle.radian, 100));
 //      console.log(data.distance);
-
-      var RobotSpeed = 0;
-
-      var Left_Direction = "fwd";
-      var Right_Direction = "fwd";
-      var Left_Speed = 0;
-      var Right_Speed = 0;
 
 
       //run engines in full reverse
@@ -571,51 +572,27 @@ $(document).ready(function () {
         }
       }
 
-      if (Left_Speed !== LastLeftSpeed || Right_Speed !== LastRightSpeed) {
-        LastLeftSpeed = Left_Speed;
-        LastRightSpeed = Right_Speed;
+      if (Left_Speed !== lastLeftSpeed || Right_Speed !== lastRightSpeed) {
+        lastLeftSpeed = Left_Speed;
+        lastRightSpeed = Right_Speed;
 
-        var QData = "operation=motion&FL=on&FL_dir=" + Left_Direction + "&FL_speed=" + Left_Speed + "&FR=on&FR_dir=" + Right_Direction + "&FR_speed=" + Right_Speed + "&BL=on&BL_dir=" + Left_Direction + "&BL_speed=" + Left_Speed + "&BR=on&BR_dir=" + Right_Direction + "&BR_speed=" + Right_Speed + "";
 
-        startCamera();
-        var UrlToGet = hostname + "controls?" + QData;
-        $.get(UrlToGet, function (data, status) {
-          console.log("Data: " + data + "    -- Status: " + status);
+        var face_change = "";
+        if (Left_Direction === "bkw" && Right_Direction === "bkw") {
+          face_change = "&write_data=yes&q=<Set_Face,1,8,>";
+        }
 
-          if (Left_Direction === "bkw" && Right_Direction === "bkw") {
-            var UrlToGet = hostname + "write_data?q=<Set_Face,1,8,>";
-            $.get(UrlToGet, function (data, status) {
-              console.log("Data: " + data + "    -- Status: " + status);
-            });
-          }
-          else if (Left_Direction === "fwd" && Right_Direction === "fwd") {
-            var UrlToGet = hostname + "write_data?q=<Set_Face,1,10,>";
-            $.get(UrlToGet, function (data, status) {
-              console.log("Data: " + data + "    -- Status: " + status);
-            });
-          }
-        });
+        if (Left_Direction === "fwd" && Right_Direction === "fwd") {
+          face_change = "&write_data=yes&q=<Set_Face,1,10,>";
+        }
 
-        SendMotorsOffSignal = 0;
+
+        startCamera(false);
+        motionTimeout=10;
+        motionCommandCache = "start_camera=yes&motion=yes&FL=on&FL_dir=" + Left_Direction + "&FL_speed=" + Left_Speed + "&FR=on&FR_dir=" + Right_Direction + "&FR_speed=" + Right_Speed + "&BL=on&BL_dir=" + Left_Direction + "&BL_speed=" + Left_Speed + "&BR=on&BR_dir=" + Right_Direction + "&BR_speed=" + Right_Speed + "" + face_change;
+
+        sendMotorCommand();
       }
-
-      SendMotorsOffSignal++;
-
-      // if (SendMotorsOffSignal < 2) {
-      //   var QData = "operation=motion&FL=off&FR=off&BL=off&BR=off";
-      //   var UrlToGet = hostname + "controls?" + QData;
-      //
-      //   $.get(UrlToGet, function (data, status) {
-      //     console.log("Data: " + data + "    -- Status: " + status);
-      //
-      //     var UrlToGet = hostname + "write_data?q=<Set_Face,1,3,>";
-      //     $.get(UrlToGet, function (data, status) {
-      //       console.log("Data: " + data + "    -- Status: " + status);
-      //     });
-      //
-      //   });
-      // }
-
     }
   });
 
@@ -624,10 +601,11 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "w", on_keyup: function () {
-      startCamera();
-      var QData = "operation=motion&FL=on&FL_dir=fwd&FL_speed=96&FR=on&FR_dir=fwd&FR_speed=96&BL=on&BL_dir=fwd&BL_speed=96&BR=on&BR_dir=fwd&BR_speed=96";
-      var UrlToGet = hostname + "controls?" + QData;
-      $.get(UrlToGet, function (data, status) {
+      motionTimeout=5;
+      startCamera(false);
+      var qData = "start_camera=yes&motion=yes&FL=on&FL_dir=fwd&FL_speed=96&FR=on&FR_dir=fwd&FR_speed=96&BL=on&BL_dir=fwd&BL_speed=96&BR=on&BR_dir=fwd&BR_speed=96";
+      var urlToGet = hostname + "robot_cmd?controls=yes&" + qData;
+      $.get(urlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
     }
@@ -635,10 +613,11 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "s", on_keyup: function () {
-      startCamera();
-      var QData = "operation=motion&FL=on&FL_dir=bkw&FL_speed=96&FR=on&FR_dir=bkw&FR_speed=96&BL=on&BL_dir=bkw&BL_speed=96&BR=on&BR_dir=bkw&BR_speed=96";
-      var UrlToGet = hostname + "controls?" + QData;
-      $.get(UrlToGet, function (data, status) {
+      motionTimeout=5;
+      startCamera(false);
+      var qData = "start_camera=yes&motion=yes&FL=on&FL_dir=bkw&FL_speed=96&FR=on&FR_dir=bkw&FR_speed=96&BL=on&BL_dir=bkw&BL_speed=96&BR=on&BR_dir=bkw&BR_speed=96";
+      var urlToGet = hostname + "robot_cmd?controls=yes&" + qData;
+      $.get(urlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
     }
@@ -646,11 +625,12 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "a", on_keyup: function () {
-      startCamera();
-      var QData = "operation=motion&FL=on&FL_dir=bkw&FL_speed=156&FR=on&FR_dir=fwd&FR_speed=156&BL=on&BL_dir=bkw&BL_speed=156&BR=on&BR_dir=fwd&BR_speed=156";
-      var UrlToGet = hostname + "controls?" + QData;
+      motionTimeout=5;
+      startCamera(false);
+      var qData = "start_camera=yes&motion=yes&FL=on&FL_dir=bkw&FL_speed=156&FR=on&FR_dir=fwd&FR_speed=156&BL=on&BL_dir=bkw&BL_speed=156&BR=on&BR_dir=fwd&BR_speed=156";
+      var urlToGet = hostname + "robot_cmd?controls=yes&" + qData;
 
-      $.get(UrlToGet, function (data, status) {
+      $.get(urlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
     }
@@ -658,11 +638,12 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "d", on_keyup: function () {
-      startCamera();
-      var QData = "operation=motion&FL=on&FL_dir=fwd&FL_speed=156&FR=on&FR_dir=bkw&FR_speed=156&BL=on&BL_dir=fwd&BL_speed=156&BR=on&BR_dir=bkw&BR_speed=156";
-      var UrlToGet = hostname + "controls?" + QData;
+      motionTimeout=5;
+      startCamera(false);
+      var qData = "start_camera=yes&motion=yes&FL=on&FL_dir=fwd&FL_speed=156&FR=on&FR_dir=bkw&FR_speed=156&BL=on&BL_dir=fwd&BL_speed=156&BR=on&BR_dir=bkw&BR_speed=156";
+      var urlToGet = hostname + "robot_cmd?controls=yes&" + qData;
 
-      $.get(UrlToGet, function (data, status) {
+      $.get(urlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
     }
@@ -670,71 +651,30 @@ $(document).ready(function () {
 
   listener.register_combo({
     keys: "x", on_keyup: function () {
-      startCamera();
-      var QData = "operation=motion&FL=off&FR=off&BL=off&BR=off";
-      var UrlToGet = hostname + "controls?" + QData;
+      motionCommandCache = "";
+      startCamera(false);
+      var qData = "start_camera=yes&motion=yes&FL=off&FR=off&BL=off&BR=off";
+      var urlToGet = hostname + "robot_cmd?controls=yes&" + qData;
 
-      $.get(UrlToGet, function (data, status) {
+      $.get(urlToGet, function (data, status) {
         console.log("Data: " + data + "    -- Status: " + status);
       });
     }
   });
 
   setInterval(function () {
-    $("#clockplace").html(GetTime());
-    GetStatus();
+    getTime();
+    getStatus();
   }, 500);
 
 
   $('.start_camera_btn').on('click', function (evt) {
     evt.preventDefault();
 
-    startCamera();
+    startCamera(true);
     var xnum = Math.random();
     document.getElementById('panel-beep3').play();
     return false;
-  });
-
-
-  $('.generic_btn').on('click', function () {
-    document.getElementById('panel-beep3').play();
-
-    var UrlToGet = $(this).data("sendthis");
-    $.get(UrlToGet, function (data, status) {
-      console.log("Data: " + data + "    -- Status: " + status);
-    });
-
-    startCamera();
-
-    setTimeout(function () {
-      let QData = "operation=motion&FL=off&FR=off&BL=off&BR=off";
-      let UrlToGet = hostname + "controls?" + QData;
-
-      $.get(UrlToGet, function (data, status) {
-        console.log("Data: " + data + "    -- Status: " + status);
-      });
-
-    }, 2000);
-  });
-
-  $('.scan_btn').on('click', function () {
-    var xnum = Math.random();
-    document.getElementById('panel-beep2').play();
-    var UrlToGet = hostname + "write_data?q=" + $(this).val();
-
-    $.get(UrlToGet, function (data, status) {
-      console.log("Data: " + data + "    -- Status: " + status);
-    });
-  });
-
-  $('.camera_btn').on('click', function () {
-    var xnum = Math.random();
-    document.getElementById('panel-beep').play();
-    var UrlToGet = hostname + "write_data?q=" + $(this).val();
-
-    $.get(UrlToGet, function (data, status) {
-      console.log("Data: " + data + "    -- Status: " + status);
-    });
   });
 
 

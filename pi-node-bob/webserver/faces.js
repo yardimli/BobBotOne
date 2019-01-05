@@ -71,7 +71,7 @@ function drawLED(face_name) {
       (40 / (DivideMiniScreen + 2)));
   }
 
-  $.get("/set_face?face_name=" + face_name, function (data, status) {
+  $.get("/robot_cmd?set_face=yes&face_name=" + face_name, function (data, status) {
 //        console.log("Data: " + data + "    -- Status: " + status);
   });
 
@@ -131,16 +131,16 @@ $(document).ready(function () {
   }, 100);
 
 
-  UrlToGet = "/load_faces";
-  var data = {};
+  UrlToGet = "/robot_cmd";
+  var data = {"load_faces":"yes"};
 
   $.ajax({
     url: UrlToGet,
     data: data,
     dataType: "json",
     success: function (data, status) {
-      for (face in data) {
-        var xvalue = data[face];
+      for (face in data[0].files) {
+        var xvalue = data[0].files[face];
         xvalue = xvalue.replace(".txt", "");
         $('#face_list').append($('<option/>', {
           value: xvalue,
@@ -155,16 +155,16 @@ $(document).ready(function () {
     }
   });
 
-  UrlToGet = "/load_face_animations";
-  var data = {};
+  UrlToGet = "/robot_cmd";
+  var data = {"load_face_animations":"yes"};
 
   $.ajax({
     url: UrlToGet,
     data: data,
     dataType: "json",
     success: function (data, status) {
-      for (face in data) {
-        var xvalue = data[face];
+      for (face in data[0].files) {
+        var xvalue = data[0].files[face];
         xvalue = xvalue.replace(".txt", "");
         $('#animation_list').append($('<option/>', {
           value: xvalue,
@@ -191,8 +191,8 @@ $(document).ready(function () {
   $("#animation_list").on('change', function (e) {
     console.log("load animation");
 
-    UrlToGet = "/load_face_animation";
-    var data = {"face_animation_name": $(this).val() + ".txt"};
+    UrlToGet = "/robot_cmd";
+    var data = {"load_face_animation":"yes","face_animation_name": $(this).val() + ".txt"};
 
     $.ajax({
       url: UrlToGet,

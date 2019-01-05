@@ -399,432 +399,293 @@ var server = http.createServer(function (req, res) {
   }
 
   //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/serial_reset") {
-    res.writeHead(200, {
-      'Content-Type': 'text/html',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
+  else if (xpath === "/robot_cmd") {
 
-    resetPort();
+    var robot_cmd_result = [];
 
-    res.end("Starting serial reset. ");
-    return;
-  }
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.serial_kill === "yes") {
+      robot_cmd_result.push( {"op_result": "Starting serial reset. "});
+      resetPort();
+    }
 
 
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/kill_self") {
-    res.writeHead(200, {
-      'Content-Type': 'text/html',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
-
-    res.end("Starting serial reset. ");
-
-    console.log("reset_me");
-    return;
-  }
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.kill_self === "yes") {
+      robot_cmd_result.push(  {"op_result": "Starting kill self. "});
+      console.log("reset_me");
+    }
 
 
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/save_face") {
-    var face_filename = './webserver/face/faces/' + query.face_name + '.txt';
-    fs.writeFile(face_filename, query.highlight, function (err) {
-      if (err) {
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.save_face === "yes") {
+      var face_filename = './webserver/face/faces/' + query.face_name + '.txt';
+      fs.writeFile(face_filename, query.highlight, function (err) {
+        if (err) {
 //      console.log(err);
-      }
-      else {
-      }
-    });
+        }
+        else {
+        }
+      });
 
-    res.writeHead(200, {
-      'Content-Type': 'application/json',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
-    res.statusCode = 200;
-    res.end(JSON.stringify({result: "file saved"}));
-    return;
-  }
+      robot_cmd_result.push(  {"op_result": "face file saved. "});
+    }
 
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/save_face_animation") {
-    var face_filename = './webserver/face/faces/animation_' + query.face_animation_name + '.txt';
-    fs.writeFile(face_filename, query.animation_cmd, function (err) {
-      if (err) {
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.save_face_animation === "yes") {
+      var face_filename = './webserver/face/faces/animation_' + query.face_animation_name + '.txt';
+      fs.writeFile(face_filename, query.animation_cmd, function (err) {
+        if (err) {
 //      console.log(err);
+        }
+        else {
+        }
+      });
+
+      robot_cmd_result.push(  {"op_result": "animation saved. "});
+    }
+
+
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.load_faces === "yes") {
+
+      var startPath = "./webserver/face/faces";
+      var filter = ".txt";
+
+      if (!fs.existsSync(startPath)) {
+        return;
       }
-      else {
+
+      var FileList = [];
+      var files = fs.readdirSync(startPath);
+      for (var i = 0; i < files.length; i++) {
+        var filename = path.join(startPath, files[i]);
+        var stat = fs.lstatSync(filename);
+        if (stat.isDirectory()) {
+        }
+        else if ((filename.indexOf(filter) >= 0) && (filename.indexOf("animation") === -1)) {
+          FileList.push(files[i]);
+//          console.log('-- found: ', filename);
+        }
       }
-    });
 
-    res.writeHead(200, {
-      'Content-Type': 'application/json',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
-    res.statusCode = 200;
-    res.end(JSON.stringify({result: "file saved"}));
-    return;
-  }
+      robot_cmd_result.push( {"files": FileList});
+    }
+
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.load_face_animations === "yes") {
+
+      var startPath = "./webserver/face/faces";
+      var filter = ".txt";
+
+      if (!fs.existsSync(startPath)) {
+        return;
+      }
+
+      var FileList = [];
+      var files = fs.readdirSync(startPath);
+      for (var i = 0; i < files.length; i++) {
+        var filename = path.join(startPath, files[i]);
+        var stat = fs.lstatSync(filename);
+        if (stat.isDirectory()) {
+        }
+        else if ((filename.indexOf(filter) >= 0) && (filename.indexOf("animation") >= 0)) {
+          FileList.push(files[i]);
+//          console.log('-- found: ', filename);
+        }
+      }
+
+      robot_cmd_result.push( {"files": FileList});
+    }
+
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.load_face === "yes") {
+
+      var face_filename = './webserver/face/faces/' + query.face_name;
+      fs.readFile(face_filename, function (error, content) {
+        robot_cmd_result.push( {"content": content});
+      });
+    }
 
 
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/load_faces") {
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.load_face_animation === "yes") {
 
-    var startPath = "./webserver/face/faces";
-    var filter = ".txt";
+      var face_filename = './webserver/face/faces/' + query.face_animation_name;
+      fs.readFile(face_filename, function (error, content) {
 
-    if (!fs.existsSync(startPath)) {
+        res.writeHead(200, {
+          'Content-Type': 'application/json',
+          'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
+          'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+          'Pragma': 'no-cache',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Request-Method': '*',
+          'Access-Control-Allow-Methods': 'OPTIONS, GET',
+          'Access-Control-Allow-Headers': '*'
+        });
+        res.statusCode = 200;
+        res.end(content, 'utf-8');
+      });
       return;
     }
 
-    var FileList = [];
-    var files = fs.readdirSync(startPath);
-    for (var i = 0; i < files.length; i++) {
-      var filename = path.join(startPath, files[i]);
-      var stat = fs.lstatSync(filename);
-      if (stat.isDirectory()) {
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.set_face === "yes") {
+
+      var ArduinoMsg = "";
+      var face_json = [];
+      try {
+        face_json = JSON.parse(fs.readFileSync('webserver/face/faces/' + query.face_name + '.txt', 'utf8'));
+
+        ArduinoPort.flush(function (err, results) {});
+        ArduinoPort.write("<Clear_Panel,100,5,,>");
+
+        for (var i = 0; i < face_json.length; i++) {
+
+          setTimeout(function (i) {
+
+            var DrawColor = face_json[i].Color;
+
+            if (typeof DrawColor === "undefined") {
+              DrawColor = "R";
+            }
+            else {
+              DrawColor = DrawColor.charAt(0);
+              DrawColor = DrawColor.toUpperCase();
+            }
+            ArduinoMsg += "<Pix," + face_json[i].X + "," + face_json[i].Y + "," + DrawColor + ",>";
+            ArduinoPort.write("<Pix," + face_json[i].X + "," + face_json[i].Y + "," + DrawColor + ",>");
+          }, 30 * i, i);
+
+        }
+
+
+      } catch (e) {
+        console.log(e);
+        face_json = [{"error": "reading/parsing error"}];
       }
-      else if ((filename.indexOf(filter) >= 0) && (filename.indexOf("animation") === -1)) {
-        FileList.push(files[i]);
-//          console.log('-- found: ', filename);
-      }
+
+      robot_cmd_result.push(  {"op_result": "got face" + JSON.stringify(face_json) + " Sent to arduino: " + ArduinoMsg});
     }
 
-    res.writeHead(200, {
-      'Content-Type': 'application/json',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
-    res.statusCode = 200;
-    res.end(JSON.stringify(FileList), 'utf-8');
-    return;
-  }
-
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/load_face_animations") {
-
-    var startPath = "./webserver/face/faces";
-    var filter = ".txt";
-
-    if (!fs.existsSync(startPath)) {
-      return;
-    }
-
-    var FileList = [];
-    var files = fs.readdirSync(startPath);
-    for (var i = 0; i < files.length; i++) {
-      var filename = path.join(startPath, files[i]);
-      var stat = fs.lstatSync(filename);
-      if (stat.isDirectory()) {
-      }
-      else if ((filename.indexOf(filter) >= 0) && (filename.indexOf("animation") >= 0)) {
-        FileList.push(files[i]);
-//          console.log('-- found: ', filename);
-      }
-    }
-
-    res.writeHead(200, {
-      'Content-Type': 'application/json',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
-    res.statusCode = 200;
-    res.end(JSON.stringify(FileList), 'utf-8');
-    return;
-  }
-
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/load_face") {
-
-    var face_filename = './webserver/face/faces/' + query.face_name;
-    fs.readFile(face_filename, function (error, content) {
-
-      res.writeHead(200, {
-        'Content-Type': 'application/json',
-        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Request-Method': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET',
-        'Access-Control-Allow-Headers': '*'
-      });
-      res.statusCode = 200;
-      res.end(content, 'utf-8');
-    });
-    return;
-  }
-
-
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/load_face_animation") {
-
-    var face_filename = './webserver/face/faces/' + query.face_animation_name;
-    fs.readFile(face_filename, function (error, content) {
-
-      res.writeHead(200, {
-        'Content-Type': 'application/json',
-        'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-        'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Request-Method': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET',
-        'Access-Control-Allow-Headers': '*'
-      });
-      res.statusCode = 200;
-      res.end(content, 'utf-8');
-    });
-    return;
-  }
-
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/set_face") {
-
-    var ArduinoMsg = "";
-    var face_json = [];
-    try {
-      face_json = JSON.parse(fs.readFileSync('webserver/face/faces/' + query.face_name + '.txt', 'utf8'));
-
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.write_data === "yes") {
       ArduinoPort.flush(function (err, results) {});
-      ArduinoPort.write("<Clear_Panel,100,5,,>");
+      ArduinoPort.write(query.q);
 
-      for (var i = 0; i < face_json.length; i++) {
-
-        setTimeout(function (i) {
-
-          var DrawColor = face_json[i].Color;
-
-          if (typeof DrawColor === "undefined") {
-            DrawColor = "R";
-          }
-          else {
-            DrawColor = DrawColor.charAt(0);
-            DrawColor = DrawColor.toUpperCase();
-          }
-          ArduinoMsg += "<Pix," + face_json[i].X + "," + face_json[i].Y + "," + DrawColor + ",>";
-          ArduinoPort.write("<Pix," + face_json[i].X + "," + face_json[i].Y + "," + DrawColor + ",>");
-        }, 30 * i,i);
-
-      }
-
-
-    } catch (e) {
-      console.log(e);
-      face_json = [{"error": "reading/parsing error"}];
+      robot_cmd_result.push(  {"op_result": "wrote data."});
     }
 
-    res.writeHead(200, {
-      'Content-Type': 'text/html',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.read_data === "yes") {
 
-    res.end("got face" + JSON.stringify(face_json) + " Sent to arduino: " + ArduinoMsg);
-    return;
-  }
-
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/write_data") {
-    ArduinoPort.flush(function (err, results) {});
-    ArduinoPort.write(query.q);
-
-    res.writeHead(200, {
-      'Content-Type': 'text/html',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
-
-    res.end("wrote data");
-    return;
-  }
-
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/read_data") {
-    res.writeHead(200, {
-      'Content-Type': 'text/html',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
-
-    res.end(JSON.stringify(SerialData));
-    SerialData = [];
-    return;
-  }
-
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/controls") {
-    res.writeHead(200, {
-      'Content-Type': 'text/html',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
-
-    if (query.operation === "servo") {
-      StopEngines = false;
-      if (query.pan_servo === "on") {
-        motor_hat.getPWM().setPWM(15, 0, parseInt(query.pan_servo_pulse));
-      }
-      else if (query.pan_servo === "off") {
-        motor_hat.getPWM().setPWM(15, 0, 0);
-      }
-
-      if (query.tilt_servo === "on") {
-        motor_hat.getPWM().setPWM(1, 0, parseInt(query.tilt_servo_pulse));
-      }
-      else if (query.tilt_servo === "off") {
-
-        motor_hat.getPWM().setPWM(1, 0, 0);
-      }
-
-      res.end(JSON.stringify({result: true, message: "servos updated"}));
-      return;
+      robot_cmd_result.push( {"SerialData": SerialData});
+      SerialData = [];
     }
 
-    if (query.operation === "motion") {
-      StopEngines = false;
-
-      if (query.FL === "on") {
-        if (query.FL_dir === "bkw") FrontLeft.run(Adafruit_MotorHAT.BACKWARD);
-        if (query.FL_dir === "fwd") FrontLeft.run(Adafruit_MotorHAT.FORWARD);
-        FrontLeft.setSpeed(query.FL_speed);
-      }
-      else if (query.FL === "off") {
-        FrontLeft.setSpeed(0);
-        FrontLeft.run(Adafruit_MotorHAT.RELEASE);
-      }
-
-      if (query.FR === "on") {
-        if (query.FR_dir === "bkw") FrontRight.run(Adafruit_MotorHAT.FORWARD);
-        if (query.FR_dir === "fwd") FrontRight.run(Adafruit_MotorHAT.BACKWARD);
-        FrontRight.setSpeed(query.FR_speed);
-      }
-      else if (query.FR === "off") {
-        FrontRight.setSpeed(0);
-        FrontRight.run(Adafruit_MotorHAT.RELEASE);
-      }
-
-      if (query.BL === "on") {
-        if (query.BL_dir === "bkw") BackLeft.run(Adafruit_MotorHAT.FORWARD);
-        if (query.BL_dir === "fwd") BackLeft.run(Adafruit_MotorHAT.BACKWARD);
-        BackLeft.setSpeed(query.BL_speed);
-      }
-      else if (query.BL === "off") {
-        BackLeft.setSpeed(0);
-        BackLeft.run(Adafruit_MotorHAT.RELEASE);
-      }
-
-      if (query.BR === "on") {
-        if (query.BR_dir === "bkw") BackRight.run(Adafruit_MotorHAT.BACKWARD);
-        if (query.BR_dir === "fwd") BackRight.run(Adafruit_MotorHAT.FORWARD);
-        BackRight.setSpeed(query.BR_speed);
-      }
-      else if (query.BR === "off") {
-        BackRight.setSpeed(0);
-        BackRight.run(Adafruit_MotorHAT.RELEASE);
-      }
-
-      res.end(JSON.stringify({result: true, message: "motors updated"}));
-      return;
-    }
-  }
-
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/stop_camera") {
-
-    child_process.exec('./stop_camera.sh',
-      function (error, stdout, stderr) {
-        console.log('stdout: ' + stdout);
-        console.log('stderr: ' + stderr);
-        if (error !== null) {
-          console.log('exec error: ' + error);
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.controls === "yes") {
+      if (query.servo === "yes") {
+        StopEngines = false;
+        if (query.pan_servo === "on") {
+          motor_hat.getPWM().setPWM(15, 0, parseInt(query.pan_servo_pulse));
         }
-      });
-
-    res.writeHead(200, {
-      'Content-Type': 'text/html',
-      'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
-      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-      'Pragma': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Request-Method': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, GET',
-      'Access-Control-Allow-Headers': '*'
-    });
-
-    res.end("stopped camera");
-    return;
-  }
-
-
-  //--------------------------------------------------------------------------------------------------------------
-  else if (xpath === "/start_camera") {
-
-    child_process.exec('./start_camera.sh',
-      function (error, stdout, stderr) {
-        console.log('stdout: ' + stdout);
-        console.log('stderr: ' + stderr);
-        if (error !== null) {
-          console.log('exec error: ' + error);
+        else if (query.pan_servo === "off") {
+          motor_hat.getPWM().setPWM(15, 0, 0);
         }
-      });
+
+        if (query.tilt_servo === "on") {
+          motor_hat.getPWM().setPWM(1, 0, parseInt(query.tilt_servo_pulse));
+        }
+        else if (query.tilt_servo === "off") {
+
+          motor_hat.getPWM().setPWM(1, 0, 0);
+        }
+
+        robot_cmd_result.push(  {"op_result": "servos updated. "});
+      }
+
+      if (query.motion === "yes") {
+        StopEngines = false;
+
+        if (query.FL === "on") {
+          if (query.FL_dir === "bkw") FrontLeft.run(Adafruit_MotorHAT.BACKWARD);
+          if (query.FL_dir === "fwd") FrontLeft.run(Adafruit_MotorHAT.FORWARD);
+          FrontLeft.setSpeed(query.FL_speed);
+        }
+        else if (query.FL === "off") {
+          FrontLeft.setSpeed(0);
+          FrontLeft.run(Adafruit_MotorHAT.RELEASE);
+        }
+
+        if (query.FR === "on") {
+          if (query.FR_dir === "bkw") FrontRight.run(Adafruit_MotorHAT.FORWARD);
+          if (query.FR_dir === "fwd") FrontRight.run(Adafruit_MotorHAT.BACKWARD);
+          FrontRight.setSpeed(query.FR_speed);
+        }
+        else if (query.FR === "off") {
+          FrontRight.setSpeed(0);
+          FrontRight.run(Adafruit_MotorHAT.RELEASE);
+        }
+
+        if (query.BL === "on") {
+          if (query.BL_dir === "bkw") BackLeft.run(Adafruit_MotorHAT.FORWARD);
+          if (query.BL_dir === "fwd") BackLeft.run(Adafruit_MotorHAT.BACKWARD);
+          BackLeft.setSpeed(query.BL_speed);
+        }
+        else if (query.BL === "off") {
+          BackLeft.setSpeed(0);
+          BackLeft.run(Adafruit_MotorHAT.RELEASE);
+        }
+
+        if (query.BR === "on") {
+          if (query.BR_dir === "bkw") BackRight.run(Adafruit_MotorHAT.BACKWARD);
+          if (query.BR_dir === "fwd") BackRight.run(Adafruit_MotorHAT.FORWARD);
+          BackRight.setSpeed(query.BR_speed);
+        }
+        else if (query.BR === "off") {
+          BackRight.setSpeed(0);
+          BackRight.run(Adafruit_MotorHAT.RELEASE);
+        }
+
+        robot_cmd_result.push(  {"op_result": "motors updated. "});
+      }
+    }
+
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.stop_camera === "yes") {
+
+      child_process.exec('./stop_camera.sh',
+        function (error, stdout, stderr) {
+          console.log('stdout: ' + stdout);
+          console.log('stderr: ' + stderr);
+          if (error !== null) {
+            console.log('exec error: ' + error);
+          }
+        });
+
+      robot_cmd_result.push(  {"op_result": "stopped camera. "});
+    }
+
+
+    //--------------------------------------------------------------------------------------------------------------
+    if (query.start_camera === "yes") {
+
+      child_process.exec('./start_camera.sh',
+        function (error, stdout, stderr) {
+          console.log('stdout: ' + stdout);
+          console.log('stderr: ' + stderr);
+          if (error !== null) {
+            console.log('exec error: ' + error);
+          }
+        });
+
+      robot_cmd_result.push(  {"op_result": "started camera. "});
+    }
 
     res.writeHead(200, {
-      'Content-Type': 'text/html',
+      'Content-Type': 'application/json',
       'Expires': 'Mon, 10 Oct 1977 00:00:00 GMT',
       'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
       'Pragma': 'no-cache',
@@ -833,8 +694,8 @@ var server = http.createServer(function (req, res) {
       'Access-Control-Allow-Methods': 'OPTIONS, GET',
       'Access-Control-Allow-Headers': '*'
     });
-
-    res.end("started camera");
+    res.statusCode = 200;
+    res.end(JSON.stringify(robot_cmd_result));
     return;
   }
 
