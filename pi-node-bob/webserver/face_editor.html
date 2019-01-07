@@ -84,9 +84,9 @@
       <ul class="navigation">
         <li class="@@widgetactive"><a href="index.html"><i class="zmdi zmdi-home"></i> Home</a></li>
 
-        <li class="navigation__active"><a href="faces.html"><i class="zmdi zmdi-face"></i> Faces</a></li>
+        <li class="@@widgetactive"><a href="faces.html"><i class="zmdi zmdi-face"></i> Faces</a></li>
 
-        <li class="@@widgetactive"><a href="face_editor.html"><i class="zmdi zmdi-face"></i> Face Editor</a></li>
+        <li class="navigation__active"><a href="face_editor.html"><i class="zmdi zmdi-face"></i> Face Editor</a></li>
 
         <li class="@@widgetactive"><a href="widgets.html"><i class="zmdi zmdi-widgets"></i> Widgets</a></li>
       </ul>
@@ -110,7 +110,7 @@
 
   <section class="content">
     <header class="content__title">
-      <h1>Robot Faces</h1>
+      <h1>Face Editor</h1>
 
       <div class="actions">
         <a href="" class="actions__item zmdi zmdi-camera start_camera_btn"></a>
@@ -121,7 +121,7 @@
       <div class="col-lg-6">
         <div class="card">
           <div class="card-body" style="padding: 0.5rem;">
-            <canvas id="mini_canvas" width="420px" height="420px" style="background: #fff; margin:0px;"></canvas>
+            <canvas id="canvas" width="420px" height="420px" style="background: #fff; margin:0px;"></canvas>
           </div>
         </div>
       </div>
@@ -129,6 +129,7 @@
       <div class="col-lg-6">
         <div class="card">
           <div class="card-body" style="padding: 0.5rem;">
+            <canvas id="mini_canvas" width="420px" height="420px" style="background: #fff; margin:0px;"></canvas>
           </div>
         </div>
       </div>
@@ -201,7 +202,7 @@
 <!-- App functions and actions -->
 <script src="js/app.js"></script>
 
-<script src="faces.js"></script>
+<script src="face_editor.js"></script>
 
 </body>
 </html>
