@@ -524,16 +524,19 @@ $(document).ready(function () {
 
       }
       else {
-        if (data.distance > 75 && data.distance <= 100) {
+        if (data.distance > 80 && data.distance <= 100) {
+          RobotSpeed = 240;
+        }
+        if (data.distance > 60 && data.distance <= 80) {
           RobotSpeed = 128;
         }
-        if (data.distance > 50 && data.distance <= 75) {
+        if (data.distance > 40 && data.distance <= 60) {
           RobotSpeed = 96;
         }
-        if (data.distance > 25 && data.distance <= 50) {
+        if (data.distance > 20 && data.distance <= 40) {
           RobotSpeed = 64;
         }
-        if (data.distance > 5 && data.distance <= 25) {
+        if (data.distance > 5 && data.distance <= 20) {
           RobotSpeed = 32;
         }
 
@@ -564,11 +567,11 @@ $(document).ready(function () {
           if (XYSpeed.mX < -5) Left_Speed = Math.round(Left_Speed * XValue);
         }
 
-        if (Right_Speed > 128) {
-          Right_Speed = 128;
+        if (Right_Speed > 240) {
+          Right_Speed = 240;
         }
-        if (Left_Speed > 128) {
-          Left_Speed = 128;
+        if (Left_Speed > 240) {
+          Left_Speed = 240;
         }
       }
 

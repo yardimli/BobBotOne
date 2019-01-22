@@ -22,11 +22,11 @@ var sleep = require('sleep');
 
 var motor_hat = new Adafruit_MotorHAT(0x6f, 60);
 
-var FrontLeft = motor_hat.getMotor(1);
+var FrontLeft = motor_hat.getMotor(3);
 var BackLeft = motor_hat.getMotor(2);
 
-var FrontRight = motor_hat.getMotor(3);
-var BackRight = motor_hat.getMotor(4);
+var FrontRight = motor_hat.getMotor(4);
+var BackRight = motor_hat.getMotor(1);
 
 var log_filename = './logs/serial-server.log';
 
@@ -620,8 +620,8 @@ var server = http.createServer(function (req, res) {
         }
 
         if (query.FR === "on") {
-          if (query.FR_dir === "bkw") FrontRight.run(Adafruit_MotorHAT.FORWARD);
-          if (query.FR_dir === "fwd") FrontRight.run(Adafruit_MotorHAT.BACKWARD);
+          if (query.FR_dir === "fwd") FrontRight.run(Adafruit_MotorHAT.FORWARD);
+          if (query.FR_dir === "bkw") FrontRight.run(Adafruit_MotorHAT.BACKWARD);
           FrontRight.setSpeed(query.FR_speed);
         }
         else if (query.FR === "off") {
@@ -630,8 +630,8 @@ var server = http.createServer(function (req, res) {
         }
 
         if (query.BL === "on") {
-          if (query.BL_dir === "bkw") BackLeft.run(Adafruit_MotorHAT.FORWARD);
-          if (query.BL_dir === "fwd") BackLeft.run(Adafruit_MotorHAT.BACKWARD);
+          if (query.BL_dir === "fwd") BackLeft.run(Adafruit_MotorHAT.FORWARD);
+          if (query.BL_dir === "bkw") BackLeft.run(Adafruit_MotorHAT.BACKWARD);
           BackLeft.setSpeed(query.BL_speed);
         }
         else if (query.BL === "off") {
@@ -640,8 +640,8 @@ var server = http.createServer(function (req, res) {
         }
 
         if (query.BR === "on") {
-          if (query.BR_dir === "bkw") BackRight.run(Adafruit_MotorHAT.BACKWARD);
-          if (query.BR_dir === "fwd") BackRight.run(Adafruit_MotorHAT.FORWARD);
+          if (query.BR_dir === "fwd") BackRight.run(Adafruit_MotorHAT.BACKWARD);
+          if (query.BR_dir === "bkw") BackRight.run(Adafruit_MotorHAT.FORWARD);
           BackRight.setSpeed(query.BR_speed);
         }
         else if (query.BR === "off") {
