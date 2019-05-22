@@ -171,7 +171,7 @@ function startCamera(sendStart) {
       CameraRunning = false;
       console.log("Data: " + data + "    -- Status: " + status);
     });
-  }, 10000);
+  }, 60000);
 
 }
 
